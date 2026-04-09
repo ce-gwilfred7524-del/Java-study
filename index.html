@@ -1887,10 +1887,10 @@ public class Sentinel {
 // ===================================
 // PROGRESS TRACKER
 // ===================================
-let progress = JSON.parse(localStorage.getItem('java-study-progress') || '{}');
+let progress = {};
 
 function saveProgress() {
-  localStorage.setItem('java-study-progress', JSON.stringify(progress));
+  // stored in-memory (localStorage not available in this environment)
 }
 
 function toggleProgress(id) {
@@ -1918,19 +1918,10 @@ function buildProgressTracker() {
 // PAGE NAV
 // ===================================
 function showPage(id, btn) {
-  try {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const targetPage = document.getElementById('page-' + id);
-    if (!targetPage) {
-      console.error('Page not found: page-' + id);
-      return;
-    }
-    targetPage.classList.add('active');
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-  } catch (e) {
-    console.error('Error in showPage:', e, 'id:', id);
-  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
 }
 
 // ===================================
@@ -2335,55 +2326,14 @@ function hideAllAnswers() {
 // ===================================
 // INIT
 // ===================================
-try {
-  buildHome();
-  console.log('✓ buildHome completed');
-} catch (e) {
-  console.error('✗ buildHome failed:', e);
-}
-try {
-  buildTopics();
-  console.log('✓ buildTopics completed');
-} catch (e) {
-  console.error('✗ buildTopics failed:', e);
-}
-try {
-  buildQuizSetup();
-  console.log('✓ buildQuizSetup completed');
-} catch (e) {
-  console.error('✗ buildQuizSetup failed:', e);
-}
-try {
-  buildCheatsheet();
-  console.log('✓ buildCheatsheet completed');
-} catch (e) {
-  console.error('✗ buildCheatsheet failed:', e);
-}
-try {
-  buildFillBlanks();
-  console.log('✓ buildFillBlanks completed');
-} catch (e) {
-  console.error('✗ buildFillBlanks failed:', e);
-}
-try {
-  buildPastExams();
-  console.log('✓ buildPastExams completed');
-} catch (e) {
-  console.error('✗ buildPastExams failed:', e);
-}
-try {
-  buildSectionC();
-  console.log('✓ buildSectionC completed');
-} catch (e) {
-  console.error('✗ buildSectionC failed:', e);
-}
-try {
-  buildProgressTracker();
-  console.log('✓ buildProgressTracker completed');
-} catch (e) {
-  console.error('✗ buildProgressTracker failed:', e);
-}
-console.log('All initialization attempts completed. Navigation should work now.');
+buildHome();
+buildTopics();
+buildQuizSetup();
+buildCheatsheet();
+buildFillBlanks();
+buildPastExams();
+buildSectionC();
+buildProgressTracker();
 </script>
 </body>
 </html>
