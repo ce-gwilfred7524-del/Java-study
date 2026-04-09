@@ -810,13 +810,13 @@
 </header>
 
 <nav>
-  <button class="active" onclick="showPage('home', this)"><span class="nav-icon">🏠</span>Home</button>
-  <button onclick="showPage('topics', this)"><span class="nav-icon">📚</span>Topics</button>
-  <button onclick="showPage('quiz', this)"><span class="nav-icon">🎯</span>Quiz</button>
-  <button onclick="showPage('pastexams', this)"><span class="nav-icon">📄</span>Past Exams</button>
-  <button onclick="showPage('sectionc', this)"><span class="nav-icon">💻</span>Code Q's</button>
-  <button onclick="showPage('cheatsheet', this)"><span class="nav-icon">⚡</span>Cheatsheet</button>
-  <button onclick="showPage('fillblanks', this)"><span class="nav-icon">✏️</span>Fill Blanks</button>
+  <button class="active" data-page="home"><span class="nav-icon">🏠</span>Home</button>
+  <button data-page="topics"><span class="nav-icon">📚</span>Topics</button>
+  <button data-page="quiz"><span class="nav-icon">🎯</span>Quiz</button>
+  <button data-page="pastexams"><span class="nav-icon">📄</span>Past Exams</button>
+  <button data-page="sectionc"><span class="nav-icon">💻</span>Code Q's</button>
+  <button data-page="cheatsheet"><span class="nav-icon">⚡</span>Cheatsheet</button>
+  <button data-page="fillblanks"><span class="nav-icon">✏️</span>Fill Blanks</button>
 </nav>
 
 <main>
@@ -857,14 +857,14 @@
   <div class="page-header">
     <div class="section-title">// All Topics</div>
     <div class="btn-row" style="margin-top:0">
-      <button class="btn-outline" onclick="expandAll()">Expand All</button>
-      <button class="btn-outline" onclick="collapseAll()">Collapse All</button>
+      <button class="btn-outline" id="btn-expand-all">Expand All</button>
+      <button class="btn-outline" id="btn-collapse-all">Collapse All</button>
     </div>
   </div>
   <div class="search-row">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input class="search-input" id="topic-search" placeholder="Search questions..." oninput="filterTopics(this.value)">
+      <input class="search-input" id="topic-search" placeholder="Search questions...">
     </div>
   </div>
   <div id="topics-list"></div>
@@ -876,16 +876,16 @@
     <h2>🎯 Quiz Mode</h2>
     <p class="sub">Select topics and mode, then start. Questions are randomized from past exams and Dr Nofong's handout.</p>
     <div class="quiz-options-row">
-      <button class="quiz-opt active" id="qopt-all" onclick="setQuizFilter('all', this)">All questions</button>
-      <button class="quiz-opt" id="qopt-hot" onclick="setQuizFilter('hot', this)">🔥 Very Likely only</button>
-      <button class="quiz-opt" id="qopt-pastexam" onclick="setQuizFilter('pastexam', this)">📄 Past Exam only</button>
+      <button class="quiz-opt active" id="qopt-all" data-filter="all">All questions</button>
+      <button class="quiz-opt" id="qopt-hot" data-filter="hot">🔥 Very Likely only</button>
+      <button class="quiz-opt" id="qopt-pastexam" data-filter="pastexam">📄 Past Exam only</button>
     </div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Select topics:</div>
     <div class="topic-select" id="topic-select"></div>
     <div class="btn-row">
-      <button class="start-btn" onclick="startQuiz()">▶ Start Quiz</button>
-      <button class="btn-outline" onclick="selectAllTopics()">Select All</button>
-      <button class="btn-outline" onclick="deselectAllTopics()">Deselect All</button>
+      <button class="start-btn" id="btn-start-quiz">▶ Start Quiz</button>
+      <button class="btn-outline" id="btn-select-all-topics">Select All</button>
+      <button class="btn-outline" id="btn-deselect-all-topics">Deselect All</button>
     </div>
   </div>
 
@@ -895,7 +895,7 @@
         <div class="timer-dot" id="timer-dot"></div>
         <span id="quiz-timer">00:00</span>
       </div>
-      <button class="btn-outline" onclick="resetQuiz()">✕ Exit quiz</button>
+      <button class="btn-outline" id="btn-exit-quiz">✕ Exit quiz</button>
     </div>
     <div class="q-progress">
       <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
@@ -907,7 +907,7 @@
       <div class="options" id="q-options"></div>
     </div>
     <div class="feedback" id="q-feedback"></div>
-    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next →</button>
+    <button class="next-btn" id="next-btn">Next →</button>
     <div class="score-card" id="score-card">
       <div class="score-big" id="score-big"></div>
       <div class="score-msg" id="score-msg"></div>
@@ -916,8 +916,8 @@
         <div class="sb-item"><div class="sb-num" id="sb-wrong" style="color:var(--red)">0</div><div class="sb-lbl">Wrong</div></div>
         <div class="sb-item"><div class="sb-num" id="sb-time" style="color:var(--yellow)">0s</div><div class="sb-lbl">Time</div></div>
       </div>
-      <button class="retry-btn" onclick="resetQuiz()">↩ Try again</button>
-      <button class="start-btn" onclick="showPage('topics', document.querySelector('nav button:nth-child(2)'))">Review topics</button>
+      <button class="retry-btn" id="btn-retry-quiz">↩ Try again</button>
+      <button class="start-btn" id="btn-review-topics">Review topics</button>
     </div>
   </div>
 </div>
@@ -961,8 +961,8 @@
     ✏️ Section B of the exam has fill-in-the-blank questions worth 1 mark each. These are exactly that style.
   </div>
   <div class="btn-row" style="margin-bottom:1rem;">
-    <button class="btn-outline" onclick="showAllAnswers()">Show All Answers</button>
-    <button class="btn-outline" onclick="hideAllAnswers()">Hide All</button>
+    <button class="btn-outline" id="btn-show-all-answers">Show All Answers</button>
+    <button class="btn-outline" id="btn-hide-all-answers">Hide All</button>
   </div>
   <div class="fill-grid" id="fill-list"></div>
 </div>
@@ -1903,7 +1903,7 @@ function buildProgressTracker() {
   const el = document.getElementById('pt-items');
   if (!el) return;
   el.innerHTML = DATA.topics.map(t => `
-    <div class="pt-item ${progress[t.id] ? 'done' : ''}" onclick="toggleProgress('${t.id}')">
+    <div class="pt-item ${progress[t.id] ? 'done' : ''}" data-toggle-progress="${t.id}">
       <div class="pt-check">${progress[t.id] ? '✓' : ''}</div>
       <div class="pt-label">${t.name.split(' ')[0]} ${t.name.split(' ')[1] || ''}</div>
     </div>
@@ -1930,7 +1930,7 @@ function showPage(id, btn) {
 function buildHome() {
   const el = document.getElementById('home-topics');
   el.innerHTML = DATA.topics.map(t => `
-    <div class="topic-card ${t.heat}" onclick="goToTopic('${t.id}')">
+    <div class="topic-card ${t.heat}" data-goto-topic="${t.id}">
       <div class="tc-head">
         <span class="tc-name">${t.name}</span>
         <span class="badge ${t.heat}">${t.heatLabel}</span>
@@ -1941,7 +1941,7 @@ function buildHome() {
 }
 
 function goToTopic(id) {
-  showPage('topics', document.querySelector('nav button:nth-child(2)'));
+  showPage('topics', document.querySelector('nav button[data-page="topics"]'));
   setTimeout(() => {
     const el = document.getElementById('td-' + id);
     if (el) {
@@ -1958,7 +1958,7 @@ function buildTopics() {
   const el = document.getElementById('topics-list');
   el.innerHTML = DATA.topics.map(t => `
     <div class="topic-detail" id="td-${t.id}">
-      <div class="td-header" onclick="toggleTopic('${t.id}')">
+      <div class="td-header" data-toggle-topic="${t.id}">
         <div class="td-title">
           <span class="chevron" id="chev-${t.id}">›</span>
           ${t.name}
@@ -1971,12 +1971,12 @@ function buildTopics() {
         ${t.questions.map((q, i) => `
           <div class="q-item">
             <div class="q-text">${q.q.replace(/\n/g, '<br>')}</div>
-            <button class="ans-btn" onclick="toggleAns('ans-${t.id}-${i}', this)">Show answer</button>
+            <button class="ans-btn" data-toggle-ans="ans-${t.id}-${i}">Show answer</button>
             <div class="ans-box" id="ans-${t.id}-${i}">${q.a}</div>
           </div>
         `).join('')}
         <div style="margin-top:12px;">
-          <button class="btn-outline" style="font-size:11px;" onclick="markDone('${t.id}', this)">
+          <button class="btn-outline" style="font-size:11px;" data-mark-done="${t.id}">
             ${progress[t.id] ? '✓ Marked done' : '○ Mark as studied'}
           </button>
         </div>
@@ -2050,7 +2050,7 @@ function setQuizFilter(f, el) {
 function buildQuizSetup() {
   const el = document.getElementById('topic-select');
   el.innerHTML = DATA.topics.map(t => `
-    <div class="ts-item selected" id="ts-${t.id}" onclick="toggleTopicSelect('${t.id}')">
+    <div class="ts-item selected" id="ts-${t.id}" data-toggle-ts="${t.id}">
       <span class="ts-check" id="tsc-${t.id}">✓</span>
       ${t.name}
     </div>
@@ -2125,7 +2125,7 @@ function renderQuestion() {
   const letters = ['A', 'B', 'C', 'D', 'E'];
   const opts = document.getElementById('q-options');
   opts.innerHTML = q.opts.map((o, i) => `
-    <button class="opt-btn" onclick="selectOpt(${i})">
+    <button class="opt-btn" data-select-opt="${i}">
       <span class="opt-letter">${letters[i]}</span>${o}
     </button>
   `).join('');
@@ -2208,7 +2208,7 @@ function buildPastExams() {
     </div>
     ${exam.questions.map((q, qi) => `
       <div class="exam-q-card">
-        <div class="exam-q-header" onclick="toggleExamQ('eq-${ei}-${qi}', 'eqc-${ei}-${qi}')">
+        <div class="exam-q-header" data-toggle-exam-q="eq-${ei}-${qi}" data-toggle-exam-chev="eqc-${ei}-${qi}">
           <div class="exam-q-text">${qi + 1}. ${q.q}</div>
           <div class="exam-q-meta">
             <span class="badge ${['hot','warm','cool'][qi % 3]}">Q${qi+1}</span>
@@ -2245,7 +2245,7 @@ function buildSectionC() {
   const el = document.getElementById('section-c-list');
   el.innerHTML = DATA.sectionC.map((item, i) => `
     <div class="sec-c-card">
-      <div class="sc-header" onclick="toggleSC('sc-${i}', 'scc-${i}')">
+      <div class="sc-header" data-toggle-sc="sc-${i}" data-toggle-sc-chev="scc-${i}">
         <div class="sc-left">
           <div class="sc-q">${i + 1}. ${item.q.replace(/\n/g, '<br>')}</div>
         </div>
@@ -2259,7 +2259,7 @@ function buildSectionC() {
         ${item.subQuestions.map((sq, sqi) => `
           <div class="sc-subq">
             <div class="sc-subq-label">${sq.label}</div>
-            <button class="ans-btn" onclick="toggleAns('sc-ans-${i}-${sqi}', this)">Show solution</button>
+            <button class="ans-btn" data-toggle-ans="sc-ans-${i}-${sqi}">Show solution</button>
             <div class="ans-box" id="sc-ans-${i}-${sqi}" style="border-color:var(--yellow)">
               <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--code);white-space:pre-wrap;line-height:1.7;">${escapeHtml(sq.hint)}</div>
             </div>
@@ -2304,7 +2304,7 @@ function buildFillBlanks() {
       <div class="fb-num">${i + 1}.</div>
       <div class="fb-content">
         <div class="fb-q">${fb.q.replace('___', '<span class="fb-blank">___</span>')}</div>
-        <button class="ans-btn" onclick="toggleAns('fb-${i}', this)">Show answer</button>
+        <button class="ans-btn" data-toggle-ans="fb-${i}">Show answer</button>
         <div class="fb-a" id="fb-${i}">${fb.a}</div>
       </div>
     </div>
@@ -2334,6 +2334,120 @@ buildFillBlanks();
 buildPastExams();
 buildSectionC();
 buildProgressTracker();
+
+// ===================================
+// EVENT DELEGATION (replaces all onclick= attributes)
+// ===================================
+(function() {
+  // Wire up static nav buttons
+  document.querySelectorAll('nav button[data-page]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      showPage(this.dataset.page, this);
+    });
+  });
+
+  // Topics page static buttons
+  var btnExpand = document.getElementById('btn-expand-all');
+  if (btnExpand) btnExpand.addEventListener('click', expandAll);
+  var btnCollapse = document.getElementById('btn-collapse-all');
+  if (btnCollapse) btnCollapse.addEventListener('click', collapseAll);
+
+  // Topic search
+  var searchInput = document.getElementById('topic-search');
+  if (searchInput) searchInput.addEventListener('input', function() { filterTopics(this.value); });
+
+  // Quiz filter buttons
+  document.querySelectorAll('.quiz-opt[data-filter]').forEach(btn => {
+    btn.addEventListener('click', function() { setQuizFilter(this.dataset.filter, this); });
+  });
+
+  // Quiz control buttons
+  var btnStart = document.getElementById('btn-start-quiz');
+  if (btnStart) btnStart.addEventListener('click', startQuiz);
+  var btnSelectAll = document.getElementById('btn-select-all-topics');
+  if (btnSelectAll) btnSelectAll.addEventListener('click', selectAllTopics);
+  var btnDeselectAll = document.getElementById('btn-deselect-all-topics');
+  if (btnDeselectAll) btnDeselectAll.addEventListener('click', deselectAllTopics);
+  var btnExitQuiz = document.getElementById('btn-exit-quiz');
+  if (btnExitQuiz) btnExitQuiz.addEventListener('click', resetQuiz);
+  var btnNext = document.getElementById('next-btn');
+  if (btnNext) btnNext.addEventListener('click', nextQuestion);
+  var btnRetry = document.getElementById('btn-retry-quiz');
+  if (btnRetry) btnRetry.addEventListener('click', resetQuiz);
+  var btnReviewTopics = document.getElementById('btn-review-topics');
+  if (btnReviewTopics) btnReviewTopics.addEventListener('click', function() {
+    showPage('topics', document.querySelector('nav button[data-page="topics"]'));
+  });
+
+  // Fill blanks buttons
+  var btnShowAll = document.getElementById('btn-show-all-answers');
+  if (btnShowAll) btnShowAll.addEventListener('click', showAllAnswers);
+  var btnHideAll = document.getElementById('btn-hide-all-answers');
+  if (btnHideAll) btnHideAll.addEventListener('click', hideAllAnswers);
+
+  // Master delegated click handler for all dynamic content
+  document.addEventListener('click', function(e) {
+    var el = e.target.closest('[data-goto-topic],[data-toggle-topic],[data-toggle-ans],[data-mark-done],[data-toggle-progress],[data-toggle-ts],[data-select-opt],[data-toggle-exam-q],[data-toggle-sc]');
+    if (!el) return;
+
+    // Home topic card → go to topic
+    if (el.dataset.gotoTopic) {
+      goToTopic(el.dataset.gotoTopic);
+      return;
+    }
+
+    // Topics: expand/collapse topic
+    if (el.dataset.toggleTopic) {
+      toggleTopic(el.dataset.toggleTopic);
+      return;
+    }
+
+    // Show/hide answer box (topics, section C, fill blanks)
+    if (el.dataset.toggleAns) {
+      var ansEl = document.getElementById(el.dataset.toggleAns);
+      if (!ansEl) return;
+      ansEl.classList.toggle('show');
+      el.textContent = ansEl.classList.contains('show') ? 'Hide answer' : (el.textContent.includes('solution') ? 'Show solution' : 'Show answer');
+      return;
+    }
+
+    // Mark topic as done
+    if (el.dataset.markDone) {
+      markDone(el.dataset.markDone, el);
+      return;
+    }
+
+    // Progress tracker toggle
+    if (el.dataset.toggleProgress) {
+      toggleProgress(el.dataset.toggleProgress);
+      return;
+    }
+
+    // Quiz topic select
+    if (el.dataset.toggleTs) {
+      toggleTopicSelect(el.dataset.toggleTs);
+      return;
+    }
+
+    // Quiz answer option
+    if (el.dataset.selectOpt !== undefined) {
+      selectOpt(parseInt(el.dataset.selectOpt));
+      return;
+    }
+
+    // Past exam question toggle
+    if (el.dataset.toggleExamQ) {
+      toggleExamQ(el.dataset.toggleExamQ, el.dataset.toggleExamChev);
+      return;
+    }
+
+    // Section C toggle
+    if (el.dataset.toggleSc) {
+      toggleSC(el.dataset.toggleSc, el.dataset.toggleScChev);
+      return;
+    }
+  });
+})();
 </script>
 </body>
 </html>
