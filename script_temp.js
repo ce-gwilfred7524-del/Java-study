@@ -1,975 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Java CE/IS 277 — UMAT Study Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #08090e;
-    --surface: #0f1117;
-    --surface2: #161b27;
-    --surface3: #1d2535;
-    --border: #252d3d;
-    --border2: #2e3a4e;
-    --accent: #4f9eff;
-    --accent-glow: rgba(79,158,255,0.15);
-    --green: #4ade80;
-    --green-glow: rgba(74,222,128,0.12);
-    --red: #f87171;
-    --red-glow: rgba(248,113,113,0.12);
-    --yellow: #fbbf24;
-    --yellow-glow: rgba(251,191,36,0.12);
-    --purple: #a78bfa;
-    --text: #dce7f5;
-    --muted: #6b7fa3;
-    --muted2: #4a5568;
-    --code: #e2b96a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Sora', sans-serif;
-    font-size: 14px;
-    line-height: 1.65;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    top: -200px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 800px;
-    height: 400px;
-    background: radial-gradient(ellipse, rgba(79,158,255,0.04) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--surface); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-  /* HEADER */
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 1.2rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(8,9,14,0.95);
-    backdrop-filter: blur(12px);
-  }
-  .logo {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.05rem;
-    color: var(--accent);
-    letter-spacing: -0.01em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .logo-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-  .logo span { color: var(--muted); }
-  .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .header-badge {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 3px 12px;
-    font-size: 11px;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .header-badge.exam-badge {
-    color: var(--yellow);
-    border-color: rgba(251,191,36,0.3);
-    background: rgba(251,191,36,0.06);
-    animation: glow-yellow 2s ease-in-out infinite;
-  }
-  @keyframes glow-yellow { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 12px rgba(251,191,36,0.2);} }
-
-  /* NAV */
-  nav {
-    display: flex;
-    gap: 3px;
-    padding: 0.75rem 2rem;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-    background: rgba(8,9,14,0.8);
-    position: sticky;
-    top: 57px;
-    z-index: 99;
-    backdrop-filter: blur(8px);
-  }
-  nav button {
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 7px;
-    color: var(--muted);
-    padding: 5px 14px;
-    font-size: 12.5px;
-    cursor: pointer;
-    font-family: 'Sora', sans-serif;
-    font-weight: 500;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  nav button:hover { border-color: var(--border2); color: var(--text); background: var(--surface); }
-  nav button.active { background: var(--accent); border-color: var(--accent); color: #08090e; font-weight: 600; }
-  nav button .nav-icon { font-size: 14px; }
-  nav button .nav-count {
-    background: rgba(255,255,255,0.15);
-    border-radius: 10px;
-    padding: 0 6px;
-    font-size: 10px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  nav button.active .nav-count { background: rgba(0,0,0,0.2); }
-
-  /* MAIN */
-  main { max-width: 960px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
-
-  /* PAGES */
-  .page { display: none; }
-  .page.active { display: block; animation: fadein 0.2s ease; }
-  @keyframes fadein { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
-
-  /* ===== HOME PAGE ===== */
-  .hero { text-align: center; padding: 2.5rem 1rem 2rem; }
-  .hero-pre {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    opacity: 0.8;
-  }
-  .hero h1 {
-    font-size: 2.4rem;
-    font-weight: 700;
-    line-height: 1.15;
-    margin-bottom: 12px;
-    background: linear-gradient(135deg, #dce7f5 0%, var(--accent) 50%, var(--purple) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .hero p { color: var(--muted); font-size: 0.95rem; max-width: 480px; margin: 0 auto 2rem; }
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 2.5rem; }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.1rem;
-    text-align: center;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .stat-card:hover { border-color: var(--accent); transform: translateY(-3px); }
-  .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 1.9rem; color: var(--accent); font-weight: 700; }
-  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
-
-  .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; }
-  .topic-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    cursor: pointer;
-    transition: border-color 0.15s, transform 0.15s, background 0.15s;
-    position: relative;
-    overflow: hidden;
-  }
-  .topic-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px;
-    height: 100%;
-    background: var(--border);
-    transition: background 0.15s;
-  }
-  .topic-card.hot::before { background: var(--red); }
-  .topic-card.warm::before { background: var(--yellow); }
-  .topic-card.cool::before { background: var(--green); }
-  .topic-card:hover { border-color: var(--border2); transform: translateY(-2px); background: var(--surface2); }
-  .tc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
-  .tc-name { font-weight: 600; font-size: 13px; }
-  .badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
-  .badge.hot { background: var(--red-glow); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
-  .badge.warm { background: var(--yellow-glow); color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
-  .badge.cool { background: var(--green-glow); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
-  .tc-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
-
-  /* ALERT BOX */
-  .alert-box {
-    background: rgba(79,158,255,0.06);
-    border: 1px solid rgba(79,158,255,0.2);
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 12.5px;
-    color: var(--accent);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .alert-box.warn { background: var(--yellow-glow); border-color: rgba(251,191,36,0.3); color: var(--yellow); }
-
-  /* ===== TOPICS PAGE ===== */
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--purple); }
-  .topic-detail {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-bottom: 8px;
-    overflow: hidden;
-    transition: border-color 0.15s;
-  }
-  .topic-detail:hover { border-color: var(--border2); }
-  .td-header {
-    padding: 0.9rem 1.2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    transition: background 0.15s;
-    gap: 10px;
-  }
-  .td-header:hover { background: var(--surface2); }
-  .td-title { font-weight: 600; font-size: 13.5px; display: flex; align-items: center; gap: 10px; }
-  .td-body { display: none; padding: 0 1.2rem 1.2rem; border-top: 1px solid var(--border); }
-  .td-body.open { display: block; }
-  .q-item { margin-top: 14px; }
-  .q-text {
-    font-size: 13px;
-    color: var(--text);
-    margin-bottom: 6px;
-    font-weight: 500;
-    line-height: 1.55;
-    padding-left: 20px;
-    position: relative;
-  }
-  .q-text::before {
-    content: "Q";
-    position: absolute;
-    left: 0;
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    top: 2px;
-    background: var(--accent-glow);
-    width: 14px;
-    height: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 3px;
-  }
-  .ans-box {
-    background: var(--surface2);
-    border-left: 3px solid var(--green);
-    border-radius: 0 8px 8px 0;
-    padding: 10px 14px;
-    font-size: 12.5px;
-    color: var(--muted);
-    line-height: 1.65;
-    display: none;
-    margin-top: 6px;
-  }
-  .ans-box.show { display: block; }
-  .ans-box code {
-    background: var(--surface3);
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--code);
-    font-size: 12px;
-  }
-  .ans-btn {
-    margin-top: 6px;
-    font-size: 11px;
-    padding: 3px 10px;
-    border: 1px solid var(--border2);
-    border-radius: 5px;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
-    transition: all 0.15s;
-  }
-  .ans-btn:hover { border-color: var(--green); color: var(--green); }
-  .chevron { color: var(--muted); font-size: 16px; transition: transform 0.2s; flex-shrink: 0; }
-  .chevron.open { transform: rotate(90deg); }
-
-  /* ===== QUIZ PAGE ===== */
-  .quiz-setup { padding: 1rem 0; }
-  .quiz-setup h2 { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; color: var(--accent); margin-bottom: 0.5rem; }
-  .quiz-setup .sub { color: var(--muted); margin-bottom: 1.5rem; font-size: 13px; }
-  .quiz-options-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-  }
-  .quiz-opt {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: 'Sora', sans-serif;
-    color: var(--muted);
-  }
-  .quiz-opt:hover { border-color: var(--border2); color: var(--text); }
-  .quiz-opt.active { background: rgba(79,158,255,0.1); border-color: var(--accent); color: var(--accent); }
-  .topic-select { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 7px; margin-bottom: 1.5rem; }
-  .ts-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 12px;
-    cursor: pointer;
-    font-size: 12.5px;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--muted);
-  }
-  .ts-item.selected { border-color: var(--accent); background: var(--accent-glow); color: var(--text); }
-  .ts-check {
-    width: 15px; height: 15px;
-    border: 1px solid var(--border2);
-    border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    flex-shrink: 0;
-    transition: all 0.15s;
-  }
-  .ts-item.selected .ts-check { background: var(--accent); border-color: var(--accent); color: #08090e; }
-  .start-btn {
-    background: var(--accent);
-    color: #08090e;
-    border: none;
-    border-radius: 8px;
-    padding: 11px 32px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Sora', sans-serif;
-    transition: all 0.15s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .start-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-  .quiz-active { display: none; }
-  .quiz-active.show { display: block; }
-  .quiz-setup.hidden { display: none; }
-  .q-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
-  .progress-bar { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--purple)); border-radius: 3px; transition: width 0.4s ease; }
-  .q-counter { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
-  .q-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.5rem;
-    margin-bottom: 1.2rem;
-    transition: border-color 0.2s;
-  }
-  .q-topic-tag { font-size: 11px; color: var(--purple); font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
-  .q-main { font-size: 15px; font-weight: 500; line-height: 1.6; margin-bottom: 1.25rem; }
-  .q-main pre {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--code);
-    overflow-x: auto;
-    margin-top: 10px;
-    line-height: 1.6;
-  }
-  .options { display: grid; gap: 7px; }
-  .opt-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    text-align: left;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--text);
-    font-family: 'Sora', sans-serif;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .opt-btn .opt-letter {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 1px solid var(--border2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-family: 'JetBrains Mono', monospace;
-    flex-shrink: 0;
-    transition: all 0.15s;
-  }
-  .opt-btn:hover:not(:disabled) { border-color: var(--accent); }
-  .opt-btn:hover:not(:disabled) .opt-letter { border-color: var(--accent); color: var(--accent); }
-  .opt-btn.correct { background: var(--green-glow); border-color: var(--green); color: var(--green); }
-  .opt-btn.correct .opt-letter { background: var(--green); border-color: var(--green); color: #08090e; }
-  .opt-btn.wrong { background: var(--red-glow); border-color: var(--red); color: var(--red); }
-  .opt-btn.wrong .opt-letter { background: var(--red); border-color: var(--red); color: #08090e; }
-  .feedback {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-    display: none;
-  }
-  .feedback.correct { background: var(--green-glow); border-left: 3px solid var(--green); color: #86efac; display: block; }
-  .feedback.wrong { background: var(--red-glow); border-left: 3px solid var(--red); color: #fca5a5; display: block; }
-  .next-btn {
-    background: var(--accent);
-    color: #08090e;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 22px;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Sora', sans-serif;
-    display: none;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.15s;
-  }
-  .next-btn.show { display: inline-flex; }
-  .next-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-  .score-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 2.5rem;
-    text-align: center;
-    display: none;
-  }
-  .score-card.show { display: block; animation: fadein 0.3s ease; }
-  .score-big { font-family: 'JetBrains Mono', monospace; font-size: 3.5rem; font-weight: 700; margin-bottom: 0.5rem; }
-  .score-msg { font-size: 1rem; color: var(--muted); margin-bottom: 2rem; }
-  .score-breakdown {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-  .sb-item { text-align: center; }
-  .sb-num { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700; }
-  .sb-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .retry-btn {
-    background: transparent;
-    border: 1px solid var(--border2);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 10px 22px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: 'Sora', sans-serif;
-    margin-right: 8px;
-    transition: all 0.15s;
-  }
-  .retry-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* ===== CHEATSHEET ===== */
-  .cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
-  .cheat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    transition: border-color 0.15s;
-  }
-  .cheat-card:hover { border-color: var(--border2); }
-  .cheat-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-    margin-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 7px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .cheat-item { font-size: 12px; color: var(--muted); padding: 3px 0; line-height: 1.5; }
-  .cheat-item code {
-    background: var(--surface2);
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--code);
-    font-size: 11px;
-  }
-
-  /* ===== FILL IN BLANKS ===== */
-  .fill-grid { display: grid; gap: 8px; }
-  .fb-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    transition: border-color 0.15s;
-  }
-  .fb-card:hover { border-color: var(--border2); }
-  .fb-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--muted2);
-    min-width: 22px;
-    margin-top: 2px;
-  }
-  .fb-content { flex: 1; }
-  .fb-q { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-  .fb-blank {
-    display: inline-block;
-    border-bottom: 2px solid var(--border2);
-    min-width: 60px;
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-  }
-  .fb-a {
-    background: var(--surface2);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 6px 6px 0;
-    padding: 7px 12px;
-    font-size: 12px;
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    display: none;
-    margin-top: 6px;
-  }
-  .fb-a.show { display: block; }
-
-  /* ===== SECTION C (CODE WRITING) ===== */
-  .section-c-list { display: grid; gap: 10px; }
-  .sec-c-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: border-color 0.15s;
-  }
-  .sec-c-card:hover { border-color: var(--border2); }
-  .sc-header {
-    padding: 1rem 1.2rem;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: background 0.15s;
-    gap: 10px;
-  }
-  .sc-header:hover { background: var(--surface2); }
-  .sc-left { flex: 1; }
-  .sc-marks { font-size: 11px; color: var(--yellow); font-family: 'JetBrains Mono', monospace; white-space: nowrap; margin-top: 3px; }
-  .sc-q { font-size: 13px; font-weight: 500; line-height: 1.55; }
-  .sc-body { display: none; padding: 0 1.2rem 1.2rem; border-top: 1px solid var(--border); }
-  .sc-body.open { display: block; }
-  .sc-hint {
-    background: var(--surface2);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 12px;
-    line-height: 1.6;
-  }
-  .code-block {
-    background: #0a0c14;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--code);
-    overflow-x: auto;
-    margin-top: 10px;
-    line-height: 1.7;
-    white-space: pre;
-  }
-  .code-kw { color: #79c0ff; }
-  .code-type { color: #ffa657; }
-  .code-str { color: #a5d6ff; }
-  .code-comment { color: var(--muted); font-style: italic; }
-  .sc-subq { margin-top: 12px; }
-  .sc-subq-label { font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; }
-
-  /* ===== PAST EXAMS PAGE ===== */
-  .exam-grid { display: grid; gap: 12px; }
-  .exam-year-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 1.5rem 0 0.75rem;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-  .exam-year-header:first-child { margin-top: 0; }
-  .exam-year-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 6px;
-    background: rgba(79,158,255,0.1);
-    color: var(--accent);
-    border: 1px solid rgba(79,158,255,0.25);
-  }
-  .exam-year-title { font-size: 13px; color: var(--muted); }
-  .exam-q-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 11px;
-    overflow: hidden;
-    transition: border-color 0.15s;
-  }
-  .exam-q-card:hover { border-color: var(--border2); }
-  .exam-q-header {
-    padding: 0.85rem 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: background 0.15s;
-    gap: 10px;
-  }
-  .exam-q-header:hover { background: var(--surface2); }
-  .exam-q-text { font-size: 13px; font-weight: 500; flex: 1; line-height: 1.5; }
-  .exam-q-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .exam-q-body { display: none; padding: 0 1.2rem 1.2rem; border-top: 1px solid var(--border); }
-  .exam-q-body.open { display: block; }
-
-  /* ===== SEARCH BAR ===== */
-  .search-row { margin-bottom: 1.5rem; }
-  .search-input {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 10px 16px 10px 40px;
-    font-size: 13px;
-    color: var(--text);
-    font-family: 'Sora', sans-serif;
-    transition: border-color 0.15s;
-    outline: none;
-    position: relative;
-  }
-  .search-input:focus { border-color: var(--accent); }
-  .search-wrap { position: relative; }
-  .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; pointer-events: none; }
-
-  /* ===== PROGRESS TRACKER ===== */
-  .progress-tracker {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.2rem;
-    margin-bottom: 1.5rem;
-  }
-  .pt-title { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'JetBrains Mono', monospace; }
-  .pt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
-  .pt-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11.5px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .pt-item:hover { border-color: var(--border2); }
-  .pt-item.done { border-color: rgba(74,222,128,0.3); background: var(--green-glow); }
-  .pt-check {
-    width: 16px; height: 16px;
-    border: 1.5px solid var(--border2);
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    flex-shrink: 0;
-    transition: all 0.15s;
-  }
-  .pt-item.done .pt-check { background: var(--green); border-color: var(--green); color: #08090e; }
-  .pt-label { color: var(--muted); font-size: 11px; line-height: 1.3; }
-  .pt-item.done .pt-label { color: var(--green); }
-  .pt-bar-row { margin-top: 12px; display: flex; align-items: center; gap: 10px; }
-  .pt-bar { flex: 1; height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
-  .pt-bar-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.4s ease; }
-  .pt-pct { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); white-space: nowrap; }
-
-  /* TIMER */
-  .timer-widget {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--text);
-  }
-  .timer-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 1s infinite; }
-  .timer-dot.paused { background: var(--yellow); animation: none; }
-
-  /* BOTTOM ACTIONS ROW */
-  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--border2);
-    color: var(--muted);
-    border-radius: 7px;
-    padding: 7px 14px;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: 'Sora', sans-serif;
-    transition: all 0.15s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-
-  @media (max-width: 640px) {
-    main { padding: 1rem; }
-    .hero h1 { font-size: 1.6rem; }
-    header { padding: 1rem; }
-    nav { padding: 0.6rem 1rem; top: 53px; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="logo">
-    <div class="logo-dot"></div>
-    Java<span>.study()</span>
-  </div>
-  <div class="header-right">
-    <div class="header-badge exam-badge">⚡ Exam Ready</div>
-    <div class="header-badge">CE/IS 277 · UMAT · Dr Nofong</div>
-  </div>
-</header>
-
-<nav>
-  <button class="active" data-page="home"><span class="nav-icon">🏠</span>Home</button>
-  <button data-page="topics"><span class="nav-icon">📚</span>Topics</button>
-  <button data-page="quiz"><span class="nav-icon">🎯</span>Quiz</button>
-  <button data-page="pastexams"><span class="nav-icon">📄</span>Past Exams</button>
-  <button data-page="sectionc"><span class="nav-icon">💻</span>Code Q's</button>
-  <button data-page="cheatsheet"><span class="nav-icon">⚡</span>Cheatsheet</button>
-  <button data-page="fillblanks"><span class="nav-icon">✏️</span>Fill Blanks</button>
-</nav>
-
-<main>
-
-<!-- ===== HOME PAGE ===== -->
-<div class="page active" id="page-home">
-  <div class="hero">
-    <div class="hero-pre">// CE/IS 277 · UMAT · April 2025</div>
-    <h1>Java Exam<br>Study Hub</h1>
-    <p>All topics, past exam questions (2024 & 2025), Section C code questions, and 100+ practice MCQs — organized and ready.</p>
-  </div>
-  <div class="stats-row">
-    <div class="stat-card"><div class="stat-num" id="stat-topics">12</div><div class="stat-lbl">Topics</div></div>
-    <div class="stat-card"><div class="stat-num">120+</div><div class="stat-lbl">Quiz Questions</div></div>
-    <div class="stat-card"><div class="stat-num">30</div><div class="stat-lbl">Fill-in-blanks</div></div>
-    <div class="stat-card"><div class="stat-num">15</div><div class="stat-lbl">Code Questions</div></div>
-    <div class="stat-card"><div class="stat-num">3</div><div class="stat-lbl">Past Papers</div></div>
-  </div>
-
-  <div class="progress-tracker" id="home-progress">
-    <div class="pt-title">📊 Your study progress</div>
-    <div class="pt-grid" id="pt-items"></div>
-    <div class="pt-bar-row">
-      <div class="pt-bar"><div class="pt-bar-fill" id="pt-fill" style="width:0%"></div></div>
-      <div class="pt-pct" id="pt-pct">0%</div>
-    </div>
-  </div>
-
-  <div class="alert-box warn">
-    💡 <strong>Hot tip:</strong> Topics marked "Very likely" appeared in 3+ consecutive exams. Prioritise those first!
-  </div>
-  <p style="font-size:12.5px;color:var(--muted);margin-bottom:1rem;">Click any topic to study it, or go to <strong style="color:var(--accent)">Quiz</strong> to test yourself.</p>
-  <div class="topic-grid" id="home-topics"></div>
-</div>
-
-<!-- ===== TOPICS PAGE ===== -->
-<div class="page" id="page-topics">
-  <div class="page-header">
-    <div class="section-title">// All Topics</div>
-    <div class="btn-row" style="margin-top:0">
-      <button class="btn-outline" id="btn-expand-all">Expand All</button>
-      <button class="btn-outline" id="btn-collapse-all">Collapse All</button>
-    </div>
-  </div>
-  <div class="search-row">
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input class="search-input" id="topic-search" placeholder="Search questions...">
-    </div>
-  </div>
-  <div id="topics-list"></div>
-</div>
-
-<!-- ===== QUIZ PAGE ===== -->
-<div class="page" id="page-quiz">
-  <div class="quiz-setup" id="quiz-setup">
-    <h2>🎯 Quiz Mode</h2>
-    <p class="sub">Select topics and mode, then start. Questions are randomized from past exams and Dr Nofong's handout.</p>
-    <div class="quiz-options-row">
-      <button class="quiz-opt active" id="qopt-all" data-filter="all">All questions</button>
-      <button class="quiz-opt" id="qopt-hot" data-filter="hot">🔥 Very Likely only</button>
-      <button class="quiz-opt" id="qopt-pastexam" data-filter="pastexam">📄 Past Exam only</button>
-    </div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Select topics:</div>
-    <div class="topic-select" id="topic-select"></div>
-    <div class="btn-row">
-      <button class="start-btn" id="btn-start-quiz">▶ Start Quiz</button>
-      <button class="btn-outline" id="btn-select-all-topics">Select All</button>
-      <button class="btn-outline" id="btn-deselect-all-topics">Deselect All</button>
-    </div>
-  </div>
-
-  <div class="quiz-active" id="quiz-active">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;">
-      <div class="timer-widget">
-        <div class="timer-dot" id="timer-dot"></div>
-        <span id="quiz-timer">00:00</span>
-      </div>
-      <button class="btn-outline" id="btn-exit-quiz">✕ Exit quiz</button>
-    </div>
-    <div class="q-progress">
-      <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
-      <div class="q-counter" id="q-counter">0 / 0</div>
-    </div>
-    <div class="q-card" id="q-card">
-      <div class="q-topic-tag" id="q-topic-tag"></div>
-      <div class="q-main" id="q-main"></div>
-      <div class="options" id="q-options"></div>
-    </div>
-    <div class="feedback" id="q-feedback"></div>
-    <button class="next-btn" id="next-btn">Next →</button>
-    <div class="score-card" id="score-card">
-      <div class="score-big" id="score-big"></div>
-      <div class="score-msg" id="score-msg"></div>
-      <div class="score-breakdown">
-        <div class="sb-item"><div class="sb-num" id="sb-correct" style="color:var(--green)">0</div><div class="sb-lbl">Correct</div></div>
-        <div class="sb-item"><div class="sb-num" id="sb-wrong" style="color:var(--red)">0</div><div class="sb-lbl">Wrong</div></div>
-        <div class="sb-item"><div class="sb-num" id="sb-time" style="color:var(--yellow)">0s</div><div class="sb-lbl">Time</div></div>
-      </div>
-      <button class="retry-btn" id="btn-retry-quiz">↩ Try again</button>
-      <button class="start-btn" id="btn-review-topics">Review topics</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== PAST EXAMS PAGE ===== -->
-<div class="page" id="page-pastexams">
-  <div class="page-header">
-    <div class="section-title">// Past Exam Questions</div>
-  </div>
-  <div class="alert-box">
-    📌 These are actual questions from the April 2025 (CE 200 & CE/IS II) and April 2024 exams. With answers explained.
-  </div>
-  <div id="past-exams-list"></div>
-</div>
-
-<!-- ===== SECTION C PAGE ===== -->
-<div class="page" id="page-sectionc">
-  <div class="page-header">
-    <div class="section-title">// Section C — Code Writing</div>
-  </div>
-  <div class="alert-box">
-    💻 These code-writing questions are based on patterns from Dr Nofong's past exams. Practice writing these by hand!
-  </div>
-  <div class="section-c-list" id="section-c-list"></div>
-</div>
-
-<!-- ===== CHEATSHEET PAGE ===== -->
-<div class="page" id="page-cheatsheet">
-  <div class="page-header">
-    <div class="section-title">// Quick Cheatsheet</div>
-  </div>
-  <div class="cheat-grid" id="cheat-grid"></div>
-</div>
-
-<!-- ===== FILL IN BLANKS PAGE ===== -->
-<div class="page" id="page-fillblanks">
-  <div class="page-header">
-    <div class="section-title">// Fill in the Blanks (Section B style)</div>
-  </div>
-  <div class="alert-box">
-    ✏️ Section B of the exam has fill-in-the-blank questions worth 1 mark each. These are exactly that style.
-  </div>
-  <div class="btn-row" style="margin-bottom:1rem;">
-    <button class="btn-outline" id="btn-show-all-answers">Show All Answers</button>
-    <button class="btn-outline" id="btn-hide-all-answers">Hide All</button>
-  </div>
-  <div class="fill-grid" id="fill-list"></div>
-</div>
-
-</main>
-
-<script>
+﻿
 // ===================================
 // DATA
 // ===================================
@@ -979,21 +8,21 @@ const DATA = {
       id: 'jdk',
       name: 'Java Basics & JDK/JRE/JVM',
       heat: 'hot', heatLabel: 'Very likely',
-      why: 'Q1–8 in 2025 paper. Fill-in-blanks Q14–16. Appears every year.',
+      why: 'Q1â€“8 in 2025 paper. Fill-in-blanks Q14â€“16. Appears every year.',
       questions: [
-        { q: 'What is the difference between JDK, JRE, and JVM?', a: 'JDK (Java Development Kit) is for developers — includes compiler (javac) and tools. JRE (Java Runtime Environment) is for running Java programs. JVM (Java Virtual Machine) executes the bytecode. JDK includes JRE which includes JVM.' },
-        { q: 'Which tool compiles Java source code?', a: '<code>javac</code> — it takes your .java file and compiles it into a .class bytecode file.' },
+        { q: 'What is the difference between JDK, JRE, and JVM?', a: 'JDK (Java Development Kit) is for developers â€” includes compiler (javac) and tools. JRE (Java Runtime Environment) is for running Java programs. JVM (Java Virtual Machine) executes the bytecode. JDK includes JRE which includes JVM.' },
+        { q: 'Which tool compiles Java source code?', a: '<code>javac</code> â€” it takes your .java file and compiles it into a .class bytecode file.' },
         { q: 'What does the JRE do?', a: 'The JRE provides the environment to RUN (execute) Java programs. It contains the JVM and class libraries.' },
         { q: 'What is the difference between a compiler and an interpreter?', a: 'A compiler translates the ENTIRE source code into machine code at once (before execution). An interpreter reads and executes code ONE LINE AT A TIME.' },
         { q: 'What is required after installing the JDK?', a: 'You must configure the Java PATH (environment variable) so your system can find the java and javac commands.' },
-        { q: 'The command java -version checks the compiler version — True or False?', a: 'FALSE. <code>java -version</code> checks the JRE/JVM version. To check the compiler you use <code>javac -version</code>.' },
-        { q: 'What is bytecode in Java?', a: 'Bytecode is the code generated by the Java compiler (javac). It is platform-independent and is executed by the JVM. NOT machine code — it is an intermediate form.' },
-        { q: 'Java language was initially called as ___', a: '<strong>Oak</strong> — Java was originally called Oak by James Gosling at Sun Microsystems.' }
+        { q: 'The command java -version checks the compiler version â€” True or False?', a: 'FALSE. <code>java -version</code> checks the JRE/JVM version. To check the compiler you use <code>javac -version</code>.' },
+        { q: 'What is bytecode in Java?', a: 'Bytecode is the code generated by the Java compiler (javac). It is platform-independent and is executed by the JVM. NOT machine code â€” it is an intermediate form.' },
+        { q: 'Java language was initially called as ___', a: '<strong>Oak</strong> â€” Java was originally called Oak by James Gosling at Sun Microsystems.' }
       ],
       quiz: [
         { q: 'Which tool is used to compile Java source code?', opts: ['java', 'javac', 'jar', 'javadoc'], ans: 1 },
         { q: 'What does the JRE do?', opts: ['Edit code', 'Compile code', 'Run code', 'Debug code'], ans: 2 },
-        { q: 'A compiler reads one line of code at a time — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'A compiler reads one line of code at a time â€” True or False?', opts: ['True', 'False'], ans: 1 },
         { q: 'What is required after installing JDK?', opts: ['Restart system', 'Configure Java Path', 'Format drive', 'Update BIOS'], ans: 1 },
         { q: 'Java language was initially called:', opts: ['Sumatra', 'J++', 'Oak', 'Pine'], ans: 2 },
         { q: 'What is bytecode in Java?', opts: ['Code generated by a Java compiler', 'Code generated by a JVM', 'Name of Java source file', 'Block of code inside a class'], ans: 0 },
@@ -1007,25 +36,25 @@ const DATA = {
       id: 'datatypes',
       name: 'Data types, Variables & Operators',
       heat: 'hot', heatLabel: 'Very likely',
-      why: 'Q10–20 MCQ in 2025 papers. Section B Q10–12,17. Biggest topic cluster.',
+      why: 'Q10â€“20 MCQ in 2025 papers. Section B Q10â€“12,17. Biggest topic cluster.',
       questions: [
         { q: 'Which of the following is NOT a primitive data type in Java?', a: 'String is NOT primitive. Primitive types are: int, double, float, long, char, boolean, byte, short. String is an object/reference type.' },
-        { q: 'What is the result of 5 + 3 * 2 in Java?', a: '11 — Multiplication is done first (operator precedence): 3*2=6, then 5+6=11. NOT 16.' },
-        { q: 'What does (double)5 / 2 return?', a: '2.5 — The cast (double) makes 5 into 5.0, so 5.0/2 = 2.5 (not integer division).' },
-        { q: "What does char ch = 'A' + 1 assign to ch?", a: "'B' — Characters have ASCII values. 'A' = 65, so 65+1 = 66 = 'B'." },
+        { q: 'What is the result of 5 + 3 * 2 in Java?', a: '11 â€” Multiplication is done first (operator precedence): 3*2=6, then 5+6=11. NOT 16.' },
+        { q: 'What does (double)5 / 2 return?', a: '2.5 â€” The cast (double) makes 5 into 5.0, so 5.0/2 = 2.5 (not integer division).' },
+        { q: "What does char ch = 'A' + 1 assign to ch?", a: "'B' â€” Characters have ASCII values. 'A' = 65, so 65+1 = 66 = 'B'." },
         { q: 'What does casting a double to int do to the decimal part?', a: 'It TRUNCATES (cuts off) the decimal. (int)3.9 = 3, not 4. It does NOT round.' },
-        { q: 'The ++ operator increases a variable\'s value by 2 — True or False?', a: 'FALSE. ++ increases by 1 (increment by 1). To increase by 2, use x += 2.' },
-        { q: 'What is the default value of an int variable in Java?', a: '0 — Java instance variables have default values. int → 0, boolean → false, double → 0.0, String/object → null.' },
-        { q: 'What is the default value of a boolean variable?', a: 'false — boolean default is false.' },
+        { q: 'The ++ operator increases a variable\'s value by 2 â€” True or False?', a: 'FALSE. ++ increases by 1 (increment by 1). To increase by 2, use x += 2.' },
+        { q: 'What is the default value of an int variable in Java?', a: '0 â€” Java instance variables have default values. int â†’ 0, boolean â†’ false, double â†’ 0.0, String/object â†’ null.' },
+        { q: 'What is the default value of a boolean variable?', a: 'false â€” boolean default is false.' },
         { q: 'Given i = 1; what will int j = --i; give for i and j?', a: 'i will be 0 and j will be 0. The pre-decrement (--i) decrements i FIRST (i becomes 0), then assigns to j. So both are 0.' },
-        { q: 'What will System.out.println(5 + "5"); output?', a: '"55" — When you add an int to a String, Java converts the int to a String and concatenates. 5 + "5" = "55".' },
-        { q: 'What will System.out.println(3 == 3.0); output?', a: 'true — Java promotes the int 3 to double 3.0 for comparison. 3.0 == 3.0 is true.' }
+        { q: 'What will System.out.println(5 + "5"); output?', a: '"55" â€” When you add an int to a String, Java converts the int to a String and concatenates. 5 + "5" = "55".' },
+        { q: 'What will System.out.println(3 == 3.0); output?', a: 'true â€” Java promotes the int 3 to double 3.0 for comparison. 3.0 == 3.0 is true.' }
       ],
       quiz: [
         { q: 'Which of the following is NOT a primitive data type in Java?', opts: ['String', 'int', 'boolean', 'double'], ans: 0 },
         { q: 'The result of 5 + 3 * 2 in Java is:', opts: ['16', '11', '13', '10'], ans: 1 },
         { q: "What does char ch = 'A' + 1 assign to ch?", opts: ["'A'", "'B'", '66', 'Error'], ans: 1 },
-        { q: 'Arithmetic operations in Java ignore precedence — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'Arithmetic operations in Java ignore precedence â€” True or False?', opts: ['True', 'False'], ans: 1 },
         { q: 'What is the default value of a boolean in Java?', opts: ['true', 'false', 'null', '0'], ans: 1 },
         { q: 'Given i=1; what does int j = --i give for i and j?', opts: ['i=0, j=1', 'i=1, j=0', 'i=1, j=1', 'i=0, j=0'], ans: 3 },
         { q: 'What is the output of System.out.println(5 + "5");', opts: ['10', '55', '5+5', 'Compilation error'], ans: 1 },
@@ -1042,11 +71,11 @@ const DATA = {
       heat: 'hot', heatLabel: 'Very likely',
       why: 'Q18,21,22,25 MCQ 2025. Section B Q20. Long answer Q26.',
       questions: [
-        { q: 'How do you create a Scanner for console input?', a: '<code>Scanner sc = new Scanner(System.in);</code> — You must import java.util.Scanner first.' },
-        { q: 'Which method reads an integer using Scanner?', a: '<code>sc.nextInt()</code> — reads the next integer from input. Other methods: <code>nextDouble()</code>, <code>next()</code> for a word, <code>nextLine()</code> for a full line.' },
+        { q: 'How do you create a Scanner for console input?', a: '<code>Scanner sc = new Scanner(System.in);</code> â€” You must import java.util.Scanner first.' },
+        { q: 'Which method reads an integer using Scanner?', a: '<code>sc.nextInt()</code> â€” reads the next integer from input. Other methods: <code>nextDouble()</code>, <code>next()</code> for a word, <code>nextLine()</code> for a full line.' },
         { q: 'What does input.close() do?', a: 'It closes the input stream (Scanner). Always close when done to free resources.' },
         { q: 'State one advantage and one disadvantage each of Scanner vs BufferedReader.', a: 'Scanner: Advantage = easy to use, has specific methods (nextInt, nextDouble). Disadvantage = slower, can have issues mixing nextLine with nextInt. BufferedReader: Advantage = faster. Disadvantage = more complex, requires manual parsing (Integer.parseInt), must handle IOException.' },
-        { q: 'Java converts int to double using which type of conversion?', a: 'Widening conversion — it is automatic and requires no explicit cast. <code>int x = 5; double y = x;</code> works automatically.' }
+        { q: 'Java converts int to double using which type of conversion?', a: 'Widening conversion â€” it is automatic and requires no explicit cast. <code>int x = 5; double y = x;</code> works automatically.' }
       ],
       quiz: [
         { q: 'Which reads an integer from Scanner?', opts: ['input.readInt()', 'input.getInt()', 'input.inputInt()', 'input.nextInt()'], ans: 3 },
@@ -1060,15 +89,15 @@ const DATA = {
       id: 'strings',
       name: 'String Methods & Math Class',
       heat: 'hot', heatLabel: 'Very likely',
-      why: 'Q26–35 MCQ 2025. Dense cluster of practical questions.',
+      why: 'Q26â€“35 MCQ 2025. Dense cluster of practical questions.',
       questions: [
-        { q: 'What does Math.random() return?', a: 'A random double between 0.0 (inclusive) and 1.0 (exclusive). It does NOT return a random integer. Use <code>(int)(Math.random()*10)</code> for 0–9.' },
-        { q: 'What does Math.floor(3.8) return?', a: '3.0 — floor() rounds DOWN to the nearest whole number. Returns a double.' },
-        { q: "How do you access the character 'M' in the string \"James\"?", a: "<code>name.charAt(1)</code> — Indexing starts at 0: J=0, a=1, m=2, e=3, s=4. Note 'm' (lowercase) is at index 2. The exam's 'M' was capital — in the string 'James', charAt(1) gives 'a'." },
-        { q: 'Which method removes whitespace from both ends of a String?', a: '<code>trim()</code> — e.g. "  hello  ".trim() returns "hello".' },
-        { q: 'Do you need to import java.lang.Math?', a: 'FALSE — java.lang is automatically imported in every Java program. You never need to import it.' },
-        { q: 'Which method converts "123" to an integer?', a: '<code>Integer.parseInt("123")</code> — returns the int value 123.' },
-        { q: 'How do you compare two Strings in Java?', a: 'Use <code>.equals()</code> or <code>.compareTo()</code>. NEVER use == for content comparison — == checks if they are the same object in memory, not if they have the same characters.' }
+        { q: 'What does Math.random() return?', a: 'A random double between 0.0 (inclusive) and 1.0 (exclusive). It does NOT return a random integer. Use <code>(int)(Math.random()*10)</code> for 0â€“9.' },
+        { q: 'What does Math.floor(3.8) return?', a: '3.0 â€” floor() rounds DOWN to the nearest whole number. Returns a double.' },
+        { q: "How do you access the character 'M' in the string \"James\"?", a: "<code>name.charAt(1)</code> â€” Indexing starts at 0: J=0, a=1, m=2, e=3, s=4. Note 'm' (lowercase) is at index 2. The exam's 'M' was capital â€” in the string 'James', charAt(1) gives 'a'." },
+        { q: 'Which method removes whitespace from both ends of a String?', a: '<code>trim()</code> â€” e.g. "  hello  ".trim() returns "hello".' },
+        { q: 'Do you need to import java.lang.Math?', a: 'FALSE â€” java.lang is automatically imported in every Java program. You never need to import it.' },
+        { q: 'Which method converts "123" to an integer?', a: '<code>Integer.parseInt("123")</code> â€” returns the int value 123.' },
+        { q: 'How do you compare two Strings in Java?', a: 'Use <code>.equals()</code> or <code>.compareTo()</code>. NEVER use == for content comparison â€” == checks if they are the same object in memory, not if they have the same characters.' }
       ],
       quiz: [
         { q: 'What does Math.random() return?', opts: ['A random integer', 'A random double 0.0 to <1.0', 'A random double 0.0 to 1.0', 'A random float'], ans: 1 },
@@ -1084,21 +113,21 @@ const DATA = {
       id: 'control',
       name: 'Control Structures (if/else, switch, loops)',
       heat: 'hot', heatLabel: 'Very likely',
-      why: 'Q37–50 MCQ 2025. Long answer Q21 (loop), Q23 (switch→if-else). Section B Q19.',
+      why: 'Q37â€“50 MCQ 2025. Long answer Q21 (loop), Q23 (switchâ†’if-else). Section B Q19.',
       questions: [
         { q: 'How many times does a do-while loop run if the condition is initially false?', a: 'Once (1 time). A do-while always executes the body at least once BEFORE checking the condition.' },
         { q: 'What does break do in a loop or switch?', a: 'break TERMINATES the entire loop or switch statement immediately. Execution continues after the loop/switch.' },
         { q: 'What does continue do?', a: 'continue SKIPS the current iteration and jumps to the next one. It does NOT stop the loop.' },
-        { q: 'What is the result of true ^ false?', a: 'true — The ^ operator is XOR (exclusive OR). It returns true only when the two values are DIFFERENT.' },
+        { q: 'What is the result of true ^ false?', a: 'true â€” The ^ operator is XOR (exclusive OR). It returns true only when the two values are DIFFERENT.' },
         { q: 'When is switch preferred over if-else?', a: 'When the conditions are specific numeric or string MATCHES (equality checks). If you need range checks or complex logical conditions, use if-else.' },
-        { q: 'Explain the difference between while and do-while loops.', a: 'while: checks condition BEFORE executing body — if condition is false initially, body may never run. do-while: executes body FIRST, then checks condition — always runs at least once.' },
-        { q: 'What is the output of System.out.println(5 > 2 && 4 < 3);?', a: 'false — 5 > 2 is true, but 4 < 3 is false. AND (&&) requires BOTH to be true. So true && false = false.' }
+        { q: 'Explain the difference between while and do-while loops.', a: 'while: checks condition BEFORE executing body â€” if condition is false initially, body may never run. do-while: executes body FIRST, then checks condition â€” always runs at least once.' },
+        { q: 'What is the output of System.out.println(5 > 2 && 4 < 3);?', a: 'false â€” 5 > 2 is true, but 4 < 3 is false. AND (&&) requires BOTH to be true. So true && false = false.' }
       ],
       quiz: [
         { q: 'How many times does a do-while loop run if condition is initially false?', opts: ['0', '1', '2', 'Infinite'], ans: 1 },
         { q: 'What does break do in a loop?', opts: ['Skips current iteration', 'Terminates the loop/switch', 'Repeats iteration', 'Pauses execution'], ans: 1 },
-        { q: '(condition1) ^ (condition2) is true if both are true — True or False?', opts: ['True', 'False'], ans: 1 },
-        { q: 'A while loop checks the condition AFTER executing the body — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: '(condition1) ^ (condition2) is true if both are true â€” True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'A while loop checks the condition AFTER executing the body â€” True or False?', opts: ['True', 'False'], ans: 1 },
         { q: 'The output of System.out.println(5 > 2 && 4 < 3);', opts: ['true', 'false', 'Error', 'null'], ans: 1 },
         { q: 'What is the result of (true || false)?', opts: ['true', 'false', 'null', 'Error'], ans: 0 },
         { q: 'Which is used for decision making in Java?', opts: ['loop', 'switch', 'if-else', 'Both B and C'], ans: 3 },
@@ -1109,24 +138,24 @@ const DATA = {
       id: 'exceptions',
       name: 'Exception Handling',
       heat: 'hot', heatLabel: 'Very likely',
-      why: 'Q51–60 MCQ 2025. Section B Q6,7,8,20. Very consistent topic every year.',
+      why: 'Q51â€“60 MCQ 2025. Section B Q6,7,8,20. Very consistent topic every year.',
       questions: [
-        { q: 'What is the root class for all exceptions in Java?', a: 'Throwable — Both Exception and Error extend Throwable.' },
-        { q: 'What exception does Scanner.nextInt() throw if input is a String?', a: 'InputMismatchException — thrown when the next token does not match the expected type.' },
-        { q: 'Is the finally block skipped if an exception occurs?', a: 'FALSE — The finally block ALWAYS runs, whether or not an exception occurred. It is used for cleanup (like closing files).' },
-        { q: 'What is the output of dividing 3.0 by 0 in Java?', a: 'Infinity — dividing a floating-point number by zero gives Infinity, not an error. Dividing an integer by zero (3/0) throws ArithmeticException.' },
+        { q: 'What is the root class for all exceptions in Java?', a: 'Throwable â€” Both Exception and Error extend Throwable.' },
+        { q: 'What exception does Scanner.nextInt() throw if input is a String?', a: 'InputMismatchException â€” thrown when the next token does not match the expected type.' },
+        { q: 'Is the finally block skipped if an exception occurs?', a: 'FALSE â€” The finally block ALWAYS runs, whether or not an exception occurred. It is used for cleanup (like closing files).' },
+        { q: 'What is the output of dividing 3.0 by 0 in Java?', a: 'Infinity â€” dividing a floating-point number by zero gives Infinity, not an error. Dividing an integer by zero (3/0) throws ArithmeticException.' },
         { q: 'What happens when an exception is not caught?', a: 'The program CRASHES (terminates abnormally) and prints a stack trace.' },
         { q: 'What is the try block?', a: 'The try block contains the statements that MAY cause (throw) an exception that you are willing to handle. If an exception occurs, control passes to the matching catch block.' },
-        { q: 'Can a try block have multiple catch blocks?', a: 'YES — a single try block can have multiple catch blocks, each handling a different exception type.' },
+        { q: 'Can a try block have multiple catch blocks?', a: 'YES â€” a single try block can have multiple catch blocks, each handling a different exception type.' },
         { q: 'What is the difference between Checked and Unchecked exceptions?', a: 'Checked exceptions (e.g. FileNotFoundException) must be declared or handled. Unchecked exceptions (e.g. ArrayIndexOutOfBoundsException) do not need to be declared.' }
       ],
       quiz: [
         { q: 'What is the root class for all exceptions?', opts: ['Error', 'Throwable', 'Object', 'RuntimeException'], ans: 1 },
         { q: 'What exception does Scanner.nextInt() throw for non-integer input?', opts: ['ArithmeticException', 'InputMismatchException', 'IOException', 'FileNotFoundException'], ans: 1 },
-        { q: 'The finally block is skipped if an exception occurs — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'The finally block is skipped if an exception occurs â€” True or False?', opts: ['True', 'False'], ans: 1 },
         { q: 'What is the output of dividing 3.0 by 0 in Java?', opts: ['Error', 'ArithmeticException', '0', 'Infinity'], ans: 3 },
-        { q: 'An exception is an error that occurs during program compilation — True or False?', opts: ['True', 'False'], ans: 1 },
-        { q: 'A try block can have multiple catch blocks — True or False?', opts: ['True', 'False'], ans: 0 },
+        { q: 'An exception is an error that occurs during program compilation â€” True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'A try block can have multiple catch blocks â€” True or False?', opts: ['True', 'False'], ans: 0 },
         { q: 'What will happen if a try block does not throw an exception?', opts: ['catch block runs', 'Program crashes', 'catch is skipped', 'Program exits'], ans: 2 },
         { q: 'What exception is thrown by integer division by zero?', opts: ['NullPointerException', 'ArithmeticException', 'InputMismatchException', 'RuntimeException'], ans: 1 },
       ]
@@ -1137,15 +166,15 @@ const DATA = {
       heat: 'warm', heatLabel: 'Likely',
       why: 'Q54,55,61 MCQ 2025. Section B Q6,7. Long answer Q25.',
       questions: [
-        { q: 'What is the difference between PrintWriter and the File class?', a: 'File class represents a file path/location — used to check if a file exists, create, delete etc. PrintWriter actually WRITES text content to a file using methods like <code>println()</code>.' },
-        { q: 'Should PrintWriter.close() be called after writing?', a: 'YES — Always call close() to flush the buffer and properly close the file. Without it, data may not be saved.' },
-        { q: 'What exception is thrown when opening a non-existent file for reading?', a: 'FileNotFoundException — thrown when you try to open a file that does not exist.' },
-        { q: 'A file must always exist before you can write to it — True or False?', a: 'FALSE — PrintWriter can CREATE a new file if it does not exist yet.' }
+        { q: 'What is the difference between PrintWriter and the File class?', a: 'File class represents a file path/location â€” used to check if a file exists, create, delete etc. PrintWriter actually WRITES text content to a file using methods like <code>println()</code>.' },
+        { q: 'Should PrintWriter.close() be called after writing?', a: 'YES â€” Always call close() to flush the buffer and properly close the file. Without it, data may not be saved.' },
+        { q: 'What exception is thrown when opening a non-existent file for reading?', a: 'FileNotFoundException â€” thrown when you try to open a file that does not exist.' },
+        { q: 'A file must always exist before you can write to it â€” True or False?', a: 'FALSE â€” PrintWriter can CREATE a new file if it does not exist yet.' }
       ],
       quiz: [
         { q: 'Which method writes a line to a file using PrintWriter?', opts: ['writeLine()', 'output.printLine()', 'println.output()', 'output.println()'], ans: 3 },
-        { q: 'PrintWriter.close() should NOT be called after writing — True or False?', opts: ['True', 'False'], ans: 1 },
-        { q: 'A file must always exist before you can write to it — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'PrintWriter.close() should NOT be called after writing â€” True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'A file must always exist before you can write to it â€” True or False?', opts: ['True', 'False'], ans: 1 },
         { q: 'What exception is thrown when opening a non-existent file?', opts: ['IOException', 'FileNotFoundException', 'InputMismatchException', 'ArithmeticException'], ans: 1 },
       ]
     },
@@ -1153,50 +182,50 @@ const DATA = {
       id: 'arrays',
       name: 'Arrays, ArrayList & Collections',
       heat: 'hot', heatLabel: 'Very likely',
-      why: 'Q63–75 MCQ 2025. Long answer Q22 (2D array) and Q24 (Array vs ArrayList). Section C Q1.',
+      why: 'Q63â€“75 MCQ 2025. Long answer Q22 (2D array) and Q24 (Array vs ArrayList). Section C Q1.',
       questions: [
         { q: 'What is the difference between an Array and an ArrayList?', a: 'Array: FIXED size (set when created), uses [], can store primitives. ArrayList: DYNAMIC size (grows/shrinks), uses add()/remove(), can only store objects (wrapper types). ArrayList requires <code>import java.util.*</code>.' },
-        { q: 'What is the correct syntax to declare an array of 10 integers?', a: '<code>int[] array = new int[10];</code> — note: <code>array.length</code> (NOT <code>array.length()</code>) gives the size.' },
-        { q: 'Which method adds an item to an ArrayList?', a: '<code>add()</code> — e.g. <code>list.add("hello");</code>. You can also add at an index: <code>list.add(0, "hello");</code>' },
-        { q: 'How do you retrieve a value from a HashMap using a key?', a: '<code>map.get(key)</code> — e.g. <code>String val = map.get("name");</code>' },
-        { q: 'Which import is needed for ArrayList, Set, and Map?', a: '<code>import java.util.*;</code> — This imports the entire java.util package.' },
-        { q: 'Java arrays have a length() method — True or False?', a: 'FALSE — arrays use <code>array.length</code> (property, no parentheses). Strings use <code>str.length()</code> (method, with parentheses). This is a common trick question!' },
-        { q: 'Multidimensional arrays are arrays of arrays in Java — True or False?', a: 'TRUE — a 2D array is an array where each element is itself an array. <code>int[][] matrix = new int[3][4];</code>' },
-        { q: 'How do you loop through an array using for-each?', a: '<code>for (int i : array) { }</code> — this iterates over each element. The variable type must match the array element type.' }
+        { q: 'What is the correct syntax to declare an array of 10 integers?', a: '<code>int[] array = new int[10];</code> â€” note: <code>array.length</code> (NOT <code>array.length()</code>) gives the size.' },
+        { q: 'Which method adds an item to an ArrayList?', a: '<code>add()</code> â€” e.g. <code>list.add("hello");</code>. You can also add at an index: <code>list.add(0, "hello");</code>' },
+        { q: 'How do you retrieve a value from a HashMap using a key?', a: '<code>map.get(key)</code> â€” e.g. <code>String val = map.get("name");</code>' },
+        { q: 'Which import is needed for ArrayList, Set, and Map?', a: '<code>import java.util.*;</code> â€” This imports the entire java.util package.' },
+        { q: 'Java arrays have a length() method â€” True or False?', a: 'FALSE â€” arrays use <code>array.length</code> (property, no parentheses). Strings use <code>str.length()</code> (method, with parentheses). This is a common trick question!' },
+        { q: 'Multidimensional arrays are arrays of arrays in Java â€” True or False?', a: 'TRUE â€” a 2D array is an array where each element is itself an array. <code>int[][] matrix = new int[3][4];</code>' },
+        { q: 'How do you loop through an array using for-each?', a: '<code>for (int i : array) { }</code> â€” this iterates over each element. The variable type must match the array element type.' }
       ],
       quiz: [
         { q: 'Correct syntax to declare an array of 10 integers:', opts: ['int array = new int(10)', 'int array[] = new int[10]', 'array int[10]', 'new int array[10]'], ans: 1 },
         { q: 'Which method adds an item to an ArrayList?', opts: ['add()', 'insert()', 'append()', 'put()'], ans: 0 },
         { q: 'How do you retrieve a value from a HashMap?', opts: ['map.find(key)', 'map.search(key)', 'map.get(key)', 'map.lookup(key)'], ans: 2 },
         { q: 'Which import is needed for ArrayList, Set, and Map?', opts: ['java.util.*', 'java.data.*', 'java.array.*', 'java.list.*'], ans: 0 },
-        { q: 'Java arrays have a length() method — True or False?', opts: ['True', 'False'], ans: 1 },
-        { q: 'Multidimensional arrays are arrays of arrays in Java — True or False?', opts: ['True', 'False'], ans: 0 },
+        { q: 'Java arrays have a length() method â€” True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'Multidimensional arrays are arrays of arrays in Java â€” True or False?', opts: ['True', 'False'], ans: 0 },
         { q: 'How do you declare an ArrayList of Strings?', opts: ['ArrayList<String> list = new ArrayList<>()', 'String[] list = new ArrayList()', 'ArrayList list = new ArrayList<String>()', 'list = new ArrayList<String>()'], ans: 0 },
         { q: 'marks[3][2] refers to:', opts: ['Row 2, Column 3', 'Row 3, Column 2', 'Index 3', 'Invalid syntax'], ans: 1 },
         { q: 'How to loop using for-each in Java?', opts: ['for(i: array)', 'foreach(i in array)', 'for(int i : array)', 'loop(i, array)'], ans: 2 },
-        { q: 'A Set automatically maintains sorted order — True or False?', opts: ['True', 'False'], ans: 1 },
-        { q: 'A Map allows multiple identical keys — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'A Set automatically maintains sorted order â€” True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'A Map allows multiple identical keys â€” True or False?', opts: ['True', 'False'], ans: 1 },
       ]
     },
     {
       id: 'oop',
       name: 'Classes, Objects & OOP Principles',
       heat: 'hot', heatLabel: 'Very likely',
-      why: 'Q76–90 MCQ 2025. Q1–16 in 2024 paper. Section B Q1–4. OOP is tested every year.',
+      why: 'Q76â€“90 MCQ 2025. Q1â€“16 in 2024 paper. Section B Q1â€“4. OOP is tested every year.',
       questions: [
         { q: 'What is a constructor? When is it called?', a: 'A constructor is a special method used to INITIALIZE an object. It has the same name as the class and NO return type. It is called automatically when an object is created with the <code>new</code> keyword.' },
         { q: 'What is encapsulation?', a: 'Encapsulation is the process of HIDING internal details (making fields private) and providing access through public getter/setter methods. It protects the data.' },
         { q: 'What is inheritance in Java?', a: 'Inheritance is when one class acquires all the properties and behaviours of a parent class. It uses the <code>extends</code> keyword. E.g. <code>class Dog extends Animal {}</code>' },
-        { q: 'What is polymorphism?', a: 'Polymorphism means "many forms". In Java: Method Overloading (same name, different parameters — compile time) and Method Overriding (subclass redefines parent method — runtime).' },
+        { q: 'What is polymorphism?', a: 'Polymorphism means "many forms". In Java: Method Overloading (same name, different parameters â€” compile time) and Method Overriding (subclass redefines parent method â€” runtime).' },
         { q: 'What is abstraction?', a: 'Abstraction is focusing on IMPORTANT characteristics while hiding the implementation details. Achieved through abstract classes and interfaces.' },
-        { q: 'If no constructor is defined, Java provides a:', a: 'Default constructor — a no-argument constructor that Java provides automatically if you do not define any constructor.' },
+        { q: 'If no constructor is defined, Java provides a:', a: 'Default constructor â€” a no-argument constructor that Java provides automatically if you do not define any constructor.' },
         { q: 'What does the this keyword refer to?', a: 'this refers to the CURRENT object instance. It is used to distinguish instance variables from parameters with the same name.' },
-        { q: 'Can you have more than one constructor?', a: 'YES — This is called constructor OVERLOADING. Each constructor must have a different parameter list (different types or number of parameters).' },
-        { q: 'Which access modifier allows access from anywhere?', a: 'public — accessible from any class. private = same class only. protected = same package + subclasses. default (no modifier) = same package only.' },
-        { q: 'What is method overloading vs method overriding?', a: 'Overloading: SAME CLASS, same method name but different parameters (multiple methods coexist). Overriding: SUBCLASS has same method name AND parameters as parent — redefines the parent behaviour.' }
+        { q: 'Can you have more than one constructor?', a: 'YES â€” This is called constructor OVERLOADING. Each constructor must have a different parameter list (different types or number of parameters).' },
+        { q: 'Which access modifier allows access from anywhere?', a: 'public â€” accessible from any class. private = same class only. protected = same package + subclasses. default (no modifier) = same package only.' },
+        { q: 'What is method overloading vs method overriding?', a: 'Overloading: SAME CLASS, same method name but different parameters (multiple methods coexist). Overriding: SUBCLASS has same method name AND parameters as parent â€” redefines the parent behaviour.' }
       ],
       quiz: [
-        { q: 'A constructor is used to destroy objects — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'A constructor is used to destroy objects â€” True or False?', opts: ['True', 'False'], ans: 1 },
         { q: 'If no constructor is defined, Java provides a:', opts: ['copy constructor', 'default constructor', 'parameterized constructor', 'static constructor'], ans: 1 },
         { q: 'What is the purpose of the this keyword?', opts: ['Access static members', 'Access superclass members', 'Refer to the current object', 'Refer to null object'], ans: 2 },
         { q: 'Which access modifier allows access from anywhere?', opts: ['protected', 'private', 'default', 'public'], ans: 3 },
@@ -1204,7 +233,7 @@ const DATA = {
         { q: 'Which keyword is used to inherit a class in Java?', opts: ['inherits', 'extends', 'implements', 'super'], ans: 1 },
         { q: 'If a class has multiple methods with same name but different parameters:', opts: ['Method Duplication', 'Method Overloading', 'Method Overriding', 'Method Multiplication'], ans: 1 },
         { q: 'If subclass has same method as declared in parent class:', opts: ['Method Duplication', 'Method Overloading', 'Method Overriding', 'Method Multiplication'], ans: 2 },
-        { q: 'Static methods can access non-static variables directly — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'Static methods can access non-static variables directly â€” True or False?', opts: ['True', 'False'], ans: 1 },
         { q: 'The process of hiding internal details is called:', opts: ['Polymorphism', 'Inheritance', 'Encapsulation', 'Abstraction'], ans: 2 },
         { q: 'Which keyword is used to create an interface?', opts: ['interface', 'implements', 'class', 'abstract'], ans: 0 },
         { q: 'Which keyword prevents a method from being overridden?', opts: ['static', 'final', 'protected', 'private'], ans: 1 },
@@ -1214,12 +243,12 @@ const DATA = {
       id: 'variables',
       name: 'Variable Scope & Types',
       heat: 'warm', heatLabel: 'Likely',
-      why: 'Q19,23,27,37–39 in 2024 paper. Local vs instance vs static variables.',
+      why: 'Q19,23,27,37â€“39 in 2024 paper. Local vs instance vs static variables.',
       questions: [
         { q: 'What is a local variable?', a: 'A local variable is declared INSIDE a method. It is only accessible within that method and has no default value (must be initialized before use).' },
         { q: 'What is an instance variable?', a: 'An instance variable is declared inside a class but OUTSIDE any method. It belongs to the object (instance) and gets default values (int=0, boolean=false, etc.).' },
         { q: 'What is a static variable?', a: 'A static variable belongs to the CLASS, not to individual objects. All objects share the same static variable. Declared with the <code>static</code> keyword.' },
-        { q: 'Which variables are created when an object is created with new?', a: 'Instance variables — created when an object is created and destroyed when the object is destroyed.' }
+        { q: 'Which variables are created when an object is created with new?', a: 'Instance variables â€” created when an object is created and destroyed when the object is destroyed.' }
       ],
       quiz: [
         { q: 'A variable declared inside a method is called a:', opts: ['Instance variable', 'Static variable', 'Class variable', 'Local variable'], ans: 3 },
@@ -1233,8 +262,8 @@ const DATA = {
       heat: 'warm', heatLabel: 'Likely',
       why: 'Q24 MCQ. Long answer Q27 (widening vs narrowing). 2025 paper.',
       questions: [
-        { q: 'Define casting. What is widening vs narrowing?', a: 'Casting = converting one data type to another. Widening (e.g. int→double): AUTOMATIC, no data loss, smaller to larger type. Narrowing (e.g. double→int): must be EXPLICIT e.g. <code>(int)3.9</code>, can lose data (truncates decimal).' },
-        { q: 'Java converts int to double using:', a: 'Widening conversion — automatic, no cast needed. <code>int x = 5; double y = x;</code> works automatically.' },
+        { q: 'Define casting. What is widening vs narrowing?', a: 'Casting = converting one data type to another. Widening (e.g. intâ†’double): AUTOMATIC, no data loss, smaller to larger type. Narrowing (e.g. doubleâ†’int): must be EXPLICIT e.g. <code>(int)3.9</code>, can lose data (truncates decimal).' },
+        { q: 'Java converts int to double using:', a: 'Widening conversion â€” automatic, no cast needed. <code>int x = 5; double y = x;</code> works automatically.' },
         { q: 'Modulus operator (%) can be applied to which types?', a: 'BOTH integers AND floating-point numbers. <code>10 % 3 = 1</code> and <code>10.5 % 3 = 1.5</code>.' }
       ],
       quiz: [
@@ -1248,11 +277,11 @@ const DATA = {
       id: 'logical_ops',
       name: 'Logic, Boolean & Bitwise Operators',
       heat: 'hot', heatLabel: 'Very likely',
-      why: 'Section B Q6 & Q7 (complex boolean expressions) — 2 marks easy to pick up.',
+      why: 'Section B Q6 & Q7 (complex boolean expressions) â€” 2 marks easy to pick up.',
       questions: [
-        { q: 'Given x=89, what is the output of:\n((x<=49) ^ (x>=30)) ^ (x<99) && ((x>=20)||(x>=45))', a: 'Step by step with x=89:\n• (x<=49) = false, (x>=30) = true → false^true = true\n• (x<99) = true, (x>=20) = true, (x>=45) = true → (true||true) = true → true&&true = true\n• true ^ true = FALSE\nAnswer: false' },
-        { q: 'Given x=89, what is the output of:\n((x<=49) & (x>=30)) ^ (x<99) && ((x>=20)||(x>=45))', a: 'Step by step with x=89:\n• (x<=49) = false, (x>=30) = true → false & true = false (& not ^)\n• (x<99) = true, (x>=20)=true → true&&true = true\n• false ^ true = TRUE\nAnswer: true' },
-        { q: 'What is the difference between & and && in Java?', a: '& (bitwise AND): evaluates BOTH sides always. && (logical AND): SHORT-CIRCUIT — if the left side is false, the right side is NOT evaluated. Same difference for | vs ||.' },
+        { q: 'Given x=89, what is the output of:\n((x<=49) ^ (x>=30)) ^ (x<99) && ((x>=20)||(x>=45))', a: 'Step by step with x=89:\nâ€¢ (x<=49) = false, (x>=30) = true â†’ false^true = true\nâ€¢ (x<99) = true, (x>=20) = true, (x>=45) = true â†’ (true||true) = true â†’ true&&true = true\nâ€¢ true ^ true = FALSE\nAnswer: false' },
+        { q: 'Given x=89, what is the output of:\n((x<=49) & (x>=30)) ^ (x<99) && ((x>=20)||(x>=45))', a: 'Step by step with x=89:\nâ€¢ (x<=49) = false, (x>=30) = true â†’ false & true = false (& not ^)\nâ€¢ (x<99) = true, (x>=20)=true â†’ true&&true = true\nâ€¢ false ^ true = TRUE\nAnswer: true' },
+        { q: 'What is the difference between & and && in Java?', a: '& (bitwise AND): evaluates BOTH sides always. && (logical AND): SHORT-CIRCUIT â€” if the left side is false, the right side is NOT evaluated. Same difference for | vs ||.' },
         { q: 'What does ! (NOT) operator do?', a: '! negates a boolean. !true = false, !false = true. The expression !(true && false) = !(false) = true.' }
       ],
       quiz: [
@@ -1266,53 +295,53 @@ const DATA = {
 
   pastExams: [
     {
-      year: 'April 2025 — CE 200 (Section A)',
+      year: 'April 2025 â€” CE 200 (Section A)',
       questions: [
         { q: 'What is the main method signature in Java?', opts: ['public void main(String[] args)', 'public static void main(String[] args)', 'private static void main(String[] args)', 'public static void Main(String[] args)'], ans: 1, exp: 'The main method must be public, static, void, named exactly main (lowercase), and take String[] args.' },
         { q: 'What will be the output of System.out.println(5 + "5");', opts: ['10', '55', '5+5', 'Compilation error'], ans: 1, exp: 'When int is added to String, the int is converted to String and concatenated. 5 + "5" = "55".' },
         { q: 'Which of the following data types can store decimal values?', opts: ['int', 'char', 'boolean', 'double'], ans: 3, exp: 'double and float store decimal values. int, char, boolean do not.' },
         { q: 'Which loop is best suited for running a block of code a KNOWN number of times?', opts: ['while', 'do-while', 'for', 'switch'], ans: 2, exp: 'The for loop is designed for a known count: for(init; condition; update).' },
-        { q: 'int a=5; int b=2; System.out.println(a/b); — output?', opts: ['2.5', '2', '2.0', 'Compilation error'], ans: 1, exp: 'Integer division in Java truncates the decimal. 5/2 = 2 (not 2.5). To get 2.5, one must be a double.' },
+        { q: 'int a=5; int b=2; System.out.println(a/b); â€” output?', opts: ['2.5', '2', '2.0', 'Compilation error'], ans: 1, exp: 'Integer division in Java truncates the decimal. 5/2 = 2 (not 2.5). To get 2.5, one must be a double.' },
         { q: 'What is the correct way to declare an array in Java?', opts: ['int arr = new int[5]', 'int[] arr = new int[5]', 'int arr = [5]', 'array<int> arr = new array<int>[5]'], ans: 1, exp: 'int[] arr = new int[5]; is the correct declaration.' },
         { q: 'How do you create a constant variable in Java?', opts: ['static int x=10', 'final int x=10', 'const int x=10', 'define x=10'], ans: 1, exp: 'final keyword creates a constant. const is not a Java keyword.' },
         { q: 'What will System.out.println(3==3.0); output?', opts: ['true', 'false', 'Compilation error', 'NaN'], ans: 0, exp: 'Java promotes int 3 to double 3.0, then compares 3.0 == 3.0 which is true.' },
         { q: 'What happens if break is omitted in a switch statement?', opts: ['Compilation error', 'Runtime error', 'Fall-through occurs', 'Program exits'], ans: 2, exp: 'Fall-through: execution continues into the next case. This is often a bug but is intentional in some cases.' },
         { q: 'Given i=1; int j=--i; causes i and j to be:', opts: ['i=0, j=1', 'i=1, j=0', 'i=1, j=1', 'i=0, j=0'], ans: 3, exp: '--i is pre-decrement: decrements i first (i=0), then assigns to j (j=0).' },
-        { q: 'String s1="Hello"; String s2="Hello,"; System.out.println(s1==s2); — output?', opts: ['true', 'false', 'Compilation error', 'null'], ans: 1, exp: '== on Strings checks if they are the SAME OBJECT, not same content. Different string literals are different objects. Use .equals() for content comparison.' },
+        { q: 'String s1="Hello"; String s2="Hello,"; System.out.println(s1==s2); â€” output?', opts: ['true', 'false', 'Compilation error', 'null'], ans: 1, exp: '== on Strings checks if they are the SAME OBJECT, not same content. Different string literals are different objects. Use .equals() for content comparison.' },
         { q: 'Which of the following is NOT a Java keyword?', opts: ['class', 'static', 'void', 'new', 'define'], ans: 4, exp: 'define is NOT a Java keyword. class, static, void, new are all valid Java keywords.' },
       ]
     },
     {
-      year: 'April 2025 — CE/IS II (Section A, Q1–30)',
+      year: 'April 2025 â€” CE/IS II (Section A, Q1â€“30)',
       questions: [
-        { q: 'Java applications require the JDK to be installed on a system — True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE — Java applications only require the JRE (Java Runtime Environment) to run. The JDK is only needed for development (compiling).' },
-        { q: 'An interpreter translates the entire source code before execution — True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE — A COMPILER translates all at once. An interpreter translates and executes ONE LINE AT A TIME.' },
-        { q: 'A compiler reads one line of code at a time — True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE — That is the interpreter. A compiler reads the ENTIRE program and translates it all at once.' },
-        { q: 'The command java -version checks the compiler version — True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE — java -version checks the JRE version. Use javac -version for the compiler.' },
+        { q: 'Java applications require the JDK to be installed on a system â€” True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE â€” Java applications only require the JRE (Java Runtime Environment) to run. The JDK is only needed for development (compiling).' },
+        { q: 'An interpreter translates the entire source code before execution â€” True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE â€” A COMPILER translates all at once. An interpreter translates and executes ONE LINE AT A TIME.' },
+        { q: 'A compiler reads one line of code at a time â€” True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE â€” That is the interpreter. A compiler reads the ENTIRE program and translates it all at once.' },
+        { q: 'The command java -version checks the compiler version â€” True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE â€” java -version checks the JRE version. Use javac -version for the compiler.' },
         { q: 'Which tool is used to compile Java source code?', opts: ['javac', 'java', 'javadoc', 'jar'], ans: 0, exp: 'javac is the Java compiler. java is used to run bytecode. javadoc generates documentation.' },
         { q: 'What is required after installing JDK?', opts: ['Restart system', 'Configure Java Path', 'Format drive', 'Update BIOS'], ans: 1, exp: 'You must set the PATH environment variable so the system can find javac and java commands.' },
-        { q: 'A char variable can store multiple characters — True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE — char stores exactly ONE character, using single quotes: char ch = \'A\';' },
-        { q: 'Java supports only post-increment operators — True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE — Java supports BOTH pre-increment (++x) and post-increment (x++).' },
-        { q: 'The ++ operator increases a variable\'s value by 2 — True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE — ++ increases by 1. To increase by 2, use x += 2.' },
+        { q: 'A char variable can store multiple characters â€” True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE â€” char stores exactly ONE character, using single quotes: char ch = \'A\';' },
+        { q: 'Java supports only post-increment operators â€” True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE â€” Java supports BOTH pre-increment (++x) and post-increment (x++).' },
+        { q: 'The ++ operator increases a variable\'s value by 2 â€” True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE â€” ++ increases by 1. To increase by 2, use x += 2.' },
         { q: 'Which is a valid variable declaration?', opts: ['int= score;', 'int score = 90;', 'Score int: 90;', 'int score == 90;'], ans: 1, exp: 'int score = 90; is correct. Type comes first, then name, then = for assignment.' },
         { q: 'The result of 5 + 3 * 2 in Java is:', opts: ['16', '11', '13', '10'], ans: 1, exp: 'Multiplication has higher precedence: 3*2=6, then 5+6=11.' },
         { q: 'What is the result of (double)5 / 2?', opts: ['2', '2.5', '2.0', '3'], ans: 1, exp: '(double)5 casts 5 to 5.0, so 5.0/2 = 2.5.' },
-        { q: 'Comparing strings using == checks for content equality — True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE — == checks object reference (memory location). Use .equals() for content comparison.' },
-        { q: 'Math.random() returns a random integer — True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE — Math.random() returns a double between 0.0 (inclusive) and 1.0 (exclusive).' },
+        { q: 'Comparing strings using == checks for content equality â€” True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE â€” == checks object reference (memory location). Use .equals() for content comparison.' },
+        { q: 'Math.random() returns a random integer â€” True or False?', opts: ['True', 'False'], ans: 1, exp: 'FALSE â€” Math.random() returns a double between 0.0 (inclusive) and 1.0 (exclusive).' },
       ]
     },
     {
-      year: 'April 2024 — CE II (Section A)',
+      year: 'April 2024 â€” CE II (Section A)',
       questions: [
-        { q: 'When one object acquires all the properties and behaviours of a parent object, it is known as:', opts: ['Polymorphism', 'Inheritance', 'Property Acquiring', 'Abstraction'], ans: 1, exp: 'This is Inheritance — child class acquires fields and methods of parent class.' },
-        { q: 'Java is a _______ language', opts: ['Weakly typed', 'Strongly typed', 'Moderate typed', 'None of these'], ans: 1, exp: 'Java is strongly typed — all variables must have a declared type.' },
+        { q: 'When one object acquires all the properties and behaviours of a parent object, it is known as:', opts: ['Polymorphism', 'Inheritance', 'Property Acquiring', 'Abstraction'], ans: 1, exp: 'This is Inheritance â€” child class acquires fields and methods of parent class.' },
+        { q: 'Java is a _______ language', opts: ['Weakly typed', 'Strongly typed', 'Moderate typed', 'None of these'], ans: 1, exp: 'Java is strongly typed â€” all variables must have a declared type.' },
         { q: 'Java language was initially called:', opts: ['Sumatra', 'J++', 'Oak', 'Pine'], ans: 2, exp: 'Java was originally named Oak by James Gosling.' },
         { q: 'The new keyword is used to allocate memory at:', opts: ['Code time', 'Compile time', 'Runtime', 'Processing time'], ans: 2, exp: 'new allocates memory at runtime (when the program is running).' },
         { q: 'Who is known as the father of Java?', opts: ['James Gosling', 'M.P Java', 'Charles Babbage', 'Blaise Pascal'], ans: 0, exp: 'James Gosling created Java at Sun Microsystems in the early 1990s.' },
-        { q: 'If a class has multiple methods having same name but different parameters:', opts: ['Method Duplication', 'Method Overloading', 'Method Overriding', 'Method Multiplication'], ans: 1, exp: 'This is Method Overloading — same method name, different parameter lists.' },
-        { q: 'Assuming + and * are arithmetic operators, what does 2 + 4 * 5 + 1 evaluate to?', opts: ['36', '31', '26', '23'], ans: 1, exp: 'Operator precedence: 4*5=20 first, then 2+20+1=23. Wait — let me recalculate: 2 + 4*5 + 1 = 2 + 20 + 1 = 23. But answer is 23 (D).' },
+        { q: 'If a class has multiple methods having same name but different parameters:', opts: ['Method Duplication', 'Method Overloading', 'Method Overriding', 'Method Multiplication'], ans: 1, exp: 'This is Method Overloading â€” same method name, different parameter lists.' },
+        { q: 'Assuming + and * are arithmetic operators, what does 2 + 4 * 5 + 1 evaluate to?', opts: ['36', '31', '26', '23'], ans: 1, exp: 'Operator precedence: 4*5=20 first, then 2+20+1=23. Wait â€” let me recalculate: 2 + 4*5 + 1 = 2 + 20 + 1 = 23. But answer is 23 (D).' },
         { q: 'A package is a collection of:', opts: ['Classes', 'Interfaces', 'Editing tools', 'Classes and interfaces'], ans: 3, exp: 'A package is a collection of both classes and interfaces (and sub-packages).' },
-        { q: 'If subclass has the same method as in the parent class, it is known as:', opts: ['Method Duplication', 'Method Overloading', 'Method Overriding', 'Method Multiplication'], ans: 2, exp: 'Method Overriding — subclass provides its own implementation of a method defined in the parent.' },
+        { q: 'If subclass has the same method as in the parent class, it is known as:', opts: ['Method Duplication', 'Method Overloading', 'Method Overriding', 'Method Multiplication'], ans: 2, exp: 'Method Overriding â€” subclass provides its own implementation of a method defined in the parent.' },
       ]
     }
   ],
@@ -1320,11 +349,11 @@ const DATA = {
   sectionC: [
     {
       id: 'sc1',
-      q: 'Mary, a novice programmer, wants to store the names and marks of 3 students in a multidimensional array. She wrote the code below — it has many errors. (a) Identify and correct all errors [3 marks]. (b) Write a for-loop to print only the marks of each student [2 marks].',
+      q: 'Mary, a novice programmer, wants to store the names and marks of 3 students in a multidimensional array. She wrote the code below â€” it has many errors. (a) Identify and correct all errors [3 marks]. (b) Write a for-loop to print only the marks of each student [2 marks].',
       marks: '5 marks',
       errorCode: `public class storeStdMarks {
   public static void main (String[] Exams) {
-    String dimArray [] = new Int [3][2];   // ← Multiple errors
+    String dimArray [] = new Int [3][2];   // â† Multiple errors
     dimArray = [0][0] = John Annan;
     dimArray = [0][1] = 86;
     dimArray = [1][2] = Theresa Opoku;
@@ -1337,10 +366,10 @@ const DATA = {
         {
           label: 'a) Errors and corrections:',
           hint: `Errors:
-1. String dimArray[][] = new Int[3][2]; → Should be: Object[][] dimArray = new Object[3][2]; (Int is wrong, type should be Object to store both String and int)
-2. dimArray = [0][0] = John Annan; → Should be: dimArray[0][0] = "John Annan"; (no = before [, string needs quotes)
-3. Row indices are wrong — student 1 is row 0, student 2 should be row 1, student 3 should be row 2
-4. Column indices go out of bounds — 2D array has 2 columns (0 and 1)
+1. String dimArray[][] = new Int[3][2]; â†’ Should be: Object[][] dimArray = new Object[3][2]; (Int is wrong, type should be Object to store both String and int)
+2. dimArray = [0][0] = John Annan; â†’ Should be: dimArray[0][0] = "John Annan"; (no = before [, string needs quotes)
+3. Row indices are wrong â€” student 1 is row 0, student 2 should be row 1, student 3 should be row 2
+4. Column indices go out of bounds â€” 2D array has 2 columns (0 and 1)
 
 Corrected code:
 Object[][] dimArray = new Object[3][2];
@@ -1451,7 +480,7 @@ if (z == 4) {
     },
     {
       id: 'sc7',
-      q: "Write a Java program that uses a class called Student with fields: name (String), indexNumber (String), and marks (double[]). Include a constructor, a method to calculate average marks, and a method to print the student's details. [5 marks] (Likely Section C based on OOP topics)",
+      q: 'Write a Java program that uses a class called Student with fields: name (String), indexNumber (String), and marks (double[]). Include a constructor, a method to calculate average marks, and a method to print the student's details. [5 marks] (Likely Section C based on OOP topics)',
       marks: '5 marks (predicted)',
       subQuestions: [{
         label: 'Sample solution:',
@@ -1519,7 +548,7 @@ public class SafeInput {
     },
     {
       id: 'sc9',
-      q: 'Write a Java method called isPrime that takes an integer n and returns true if it is prime, false otherwise. Then write a loop in main to print all prime numbers between 1 and 50. [4 marks] (Predicted — method writing + loops)',
+      q: 'Write a Java method called isPrime that takes an integer n and returns true if it is prime, false otherwise. Then write a loop in main to print all prime numbers between 1 and 50. [4 marks] (Predicted â€” method writing + loops)',
       marks: '4 marks (predicted)',
       subQuestions: [{
         label: 'Solution:',
@@ -1546,7 +575,7 @@ public class SafeInput {
     },
     {
       id: 'sc10',
-      q: 'John has declared: integer maxValue == Maths.max(20, 15, 50); — without changing the variable name, rewrite the correct code. [1 mark]',
+      q: 'John has declared: integer maxValue == Maths.max(20, 15, 50); â€” without changing the variable name, rewrite the correct code. [1 mark]',
       marks: '1 mark',
       subQuestions: [{
         label: 'Corrected code:',
@@ -1554,7 +583,7 @@ public class SafeInput {
 // OR more clearly:
 int maxValue = Math.max(Math.max(20, 15), 50);
 // Result: maxValue = 50
-// Errors fixed: 'integer'→'int', '=='→'=', 'Maths'→'Math', Math.max only takes 2 args (nested calls needed)`
+// Errors fixed: 'integer'â†’'int', '=='â†’'=', 'Maths'â†’'Math', Math.max only takes 2 args (nested calls needed)`
       }]
     },
     {
@@ -1566,7 +595,7 @@ int maxValue = Math.max(Math.max(20, 15), 50);
         hint: `// Assume A and B are HashSet<Integer>
 import java.util.*;
 
-// (a) Intersection — stored in B
+// (a) Intersection â€” stored in B
 B.retainAll(A);  // B now contains only elements in both A and B
 
 // (b) Subtract B from A (A minus B)
@@ -1631,7 +660,7 @@ public class MaxMin {
     },
     {
       id: 'sc14',
-      q: 'Write Java code to read integers from the user until they enter -1 (sentinel value). Then print the count and sum of all entered numbers. [3 marks] (Predicted — while loops with sentinel)',
+      q: 'Write Java code to read integers from the user until they enter -1 (sentinel value). Then print the count and sum of all entered numbers. [3 marks] (Predicted â€” while loops with sentinel)',
       marks: '3 marks (predicted)',
       subQuestions: [{
         label: 'Solution:',
@@ -1661,7 +690,7 @@ public class Sentinel {
     },
     {
       id: 'sc15',
-      q: 'Define a class called Rectangle with fields width and height. Add methods to calculate area (width × height) and perimeter (2 × (width + height)). Create two Rectangle objects and print their area and perimeter. [4 marks] (Predicted — OOP/class writing)',
+      q: 'Define a class called Rectangle with fields width and height. Add methods to calculate area (width Ã— height) and perimeter (2 Ã— (width + height)). Create two Rectangle objects and print their area and perimeter. [4 marks] (Predicted â€” OOP/class writing)',
       marks: '4 marks (predicted)',
       subQuestions: [{
         label: 'Solution:',
@@ -1733,7 +762,7 @@ public class Sentinel {
   cheatsheet: [
     {
       title: 'JDK / JRE / JVM',
-      icon: '☕',
+      icon: 'â˜•',
       items: [
         'JDK = Java Development Kit (for developers)',
         'JRE = Java Runtime Environment (to run programs)',
@@ -1745,19 +774,19 @@ public class Sentinel {
     },
     {
       title: 'Primitive data types',
-      icon: '📦',
+      icon: 'ðŸ“¦',
       items: [
         '<code>int, double, float, long, byte, short</code>',
         '<code>char</code> (single quotes: \'A\')',
         '<code>boolean</code> (true / false)',
-        'String is NOT primitive — it is an object',
+        'String is NOT primitive â€” it is an object',
         'int default: 0 | boolean default: false',
         'double default: 0.0 | object default: null'
       ]
     },
     {
       title: 'Operator Precedence',
-      icon: '🔢',
+      icon: 'ðŸ”¢',
       items: [
         '1st: <code>()</code> parentheses',
         '2nd: <code>*, /, %</code> (multiply/divide/modulo)',
@@ -1769,59 +798,59 @@ public class Sentinel {
     },
     {
       title: 'Scanner Usage',
-      icon: '⌨️',
+      icon: 'âŒ¨ï¸',
       items: [
         '<code>import java.util.Scanner;</code>',
         '<code>Scanner sc = new Scanner(System.in);</code>',
-        '<code>sc.nextInt()</code> — reads integer',
-        '<code>sc.nextDouble()</code> — reads double',
-        '<code>sc.next()</code> — reads one word',
-        '<code>sc.nextLine()</code> — reads full line',
-        '<code>sc.close()</code> — closes stream'
+        '<code>sc.nextInt()</code> â€” reads integer',
+        '<code>sc.nextDouble()</code> â€” reads double',
+        '<code>sc.next()</code> â€” reads one word',
+        '<code>sc.nextLine()</code> â€” reads full line',
+        '<code>sc.close()</code> â€” closes stream'
       ]
     },
     {
       title: 'Math class methods',
-      icon: '📐',
+      icon: 'ðŸ“',
       items: [
-        '<code>Math.random()</code> → double 0.0 to &lt;1.0',
-        '<code>Math.floor(3.8)</code> → 3.0 (round down)',
-        '<code>Math.ceil(3.2)</code> → 4.0 (round up)',
-        '<code>Math.round(3.5)</code> → 4 (nearest)',
-        '<code>Math.abs(-5)</code> → 5 (absolute value)',
-        '<code>Math.max(a, b)</code> → larger of two values',
+        '<code>Math.random()</code> â†’ double 0.0 to &lt;1.0',
+        '<code>Math.floor(3.8)</code> â†’ 3.0 (round down)',
+        '<code>Math.ceil(3.2)</code> â†’ 4.0 (round up)',
+        '<code>Math.round(3.5)</code> â†’ 4 (nearest)',
+        '<code>Math.abs(-5)</code> â†’ 5 (absolute value)',
+        '<code>Math.max(a, b)</code> â†’ larger of two values',
         'java.lang.Math is auto-imported (no import needed)'
       ]
     },
     {
       title: 'String methods',
-      icon: '📝',
+      icon: 'ðŸ“',
       items: [
-        '<code>s.length()</code> — length of string',
-        '<code>s.charAt(0)</code> — char at index 0 (0-based!)',
-        '<code>s.substring(1, 3)</code> — chars at index 1,2',
+        '<code>s.length()</code> â€” length of string',
+        '<code>s.charAt(0)</code> â€” char at index 0 (0-based!)',
+        '<code>s.substring(1, 3)</code> â€” chars at index 1,2',
         '<code>s.toUpperCase()</code> / <code>toLowerCase()</code>',
-        '<code>s.trim()</code> — remove leading/trailing spaces',
-        '<code>s.equals("x")</code> — compare content (NOT ==)',
-        '<code>s.contains("x")</code> — check if substring exists'
+        '<code>s.trim()</code> â€” remove leading/trailing spaces',
+        '<code>s.equals("x")</code> â€” compare content (NOT ==)',
+        '<code>s.contains("x")</code> â€” check if substring exists'
       ]
     },
     {
       title: 'Exception Handling',
-      icon: '⚠️',
+      icon: 'âš ï¸',
       items: [
-        '<code>Throwable</code> → root of all exceptions',
+        '<code>Throwable</code> â†’ root of all exceptions',
         '<code>try { } catch(Exception e) { } finally { }</code>',
         '<code>finally</code> ALWAYS runs (with or without exception)',
-        '<code>InputMismatchException</code> — wrong input type',
-        '<code>FileNotFoundException</code> — file not found',
-        '<code>ArithmeticException</code> — e.g. int/0',
+        '<code>InputMismatchException</code> â€” wrong input type',
+        '<code>FileNotFoundException</code> â€” file not found',
+        '<code>ArithmeticException</code> â€” e.g. int/0',
         '3.0 / 0 = <code>Infinity</code> (floating point, not error)'
       ]
     },
     {
       title: 'Arrays & ArrayList',
-      icon: '📋',
+      icon: 'ðŸ“‹',
       items: [
         '<code>int[] arr = new int[5];</code> // fixed size',
         '<code>arr[0] = 10;</code> // access by index',
@@ -1834,7 +863,7 @@ public class Sentinel {
     },
     {
       title: 'OOP Concepts',
-      icon: '🏗️',
+      icon: 'ðŸ—ï¸',
       items: [
         'Constructor: same name as class, no return type',
         'Called automatically when object is created with <code>new</code>',
@@ -1847,31 +876,31 @@ public class Sentinel {
     },
     {
       title: 'Casting & Conversion',
-      icon: '🔄',
+      icon: 'ðŸ”„',
       items: [
-        'Widening: int→double (automatic, no data loss)',
-        'Narrowing: double→int (explicit: <code>(int)3.9</code> = 3)',
-        'Truncates decimal — does NOT round',
-        '<code>Integer.parseInt("5")</code> → int 5',
-        '<code>String.valueOf(5)</code> → "5"',
-        '<code>Integer.toString(5)</code> → "5"'
+        'Widening: intâ†’double (automatic, no data loss)',
+        'Narrowing: doubleâ†’int (explicit: <code>(int)3.9</code> = 3)',
+        'Truncates decimal â€” does NOT round',
+        '<code>Integer.parseInt("5")</code> â†’ int 5',
+        '<code>String.valueOf(5)</code> â†’ "5"',
+        '<code>Integer.toString(5)</code> â†’ "5"'
       ]
     },
     {
       title: 'Common Loops',
-      icon: '🔁',
+      icon: 'ðŸ”',
       items: [
-        '<code>for(int i=0; i&lt;n; i++)</code> — known count',
-        '<code>while(condition)</code> — check first, may not run',
-        '<code>do { } while(condition)</code> — runs at least once',
-        '<code>for(int x : array)</code> — for-each loop',
+        '<code>for(int i=0; i&lt;n; i++)</code> â€” known count',
+        '<code>while(condition)</code> â€” check first, may not run',
+        '<code>do { } while(condition)</code> â€” runs at least once',
+        '<code>for(int x : array)</code> â€” for-each loop',
         'break = exit loop | continue = skip iteration',
         'do-while always runs at least 1 time!'
       ]
     },
     {
       title: 'Logical & Bitwise Ops',
-      icon: '⚡',
+      icon: 'âš¡',
       items: [
         '<code>&&</code> = AND (short-circuit) | <code>&</code> = AND (no short-circuit)',
         '<code>||</code> = OR (short-circuit) | <code>|</code> = OR (no short-circuit)',
@@ -1904,7 +933,7 @@ function buildProgressTracker() {
   if (!el) return;
   el.innerHTML = DATA.topics.map(t => `
     <div class="pt-item ${progress[t.id] ? 'done' : ''}" data-toggle-progress="${t.id}">
-      <div class="pt-check">${progress[t.id] ? '✓' : ''}</div>
+      <div class="pt-check">${progress[t.id] ? 'âœ“' : ''}</div>
       <div class="pt-label">${t.name.split(' ')[0]} ${t.name.split(' ')[1] || ''}</div>
     </div>
   `).join('');
@@ -1960,14 +989,14 @@ function buildTopics() {
     <div class="topic-detail" id="td-${t.id}">
       <div class="td-header" data-toggle-topic="${t.id}">
         <div class="td-title">
-          <span class="chevron" id="chev-${t.id}">›</span>
+          <span class="chevron" id="chev-${t.id}">â€º</span>
           ${t.name}
           <span class="badge ${t.heat}">${t.heatLabel}</span>
         </div>
         <span style="font-size:11px;color:var(--muted)">${t.questions.length} Q's</span>
       </div>
       <div class="td-body" id="body-${t.id}">
-        <div style="font-size:11.5px;color:var(--muted);padding-top:10px;margin-bottom:8px;">📌 ${t.why}</div>
+        <div style="font-size:11.5px;color:var(--muted);padding-top:10px;margin-bottom:8px;">ðŸ“Œ ${t.why}</div>
         ${t.questions.map((q, i) => `
           <div class="q-item">
             <div class="q-text">${q.q.replace(/\n/g, '<br>')}</div>
@@ -1977,7 +1006,7 @@ function buildTopics() {
         `).join('')}
         <div style="margin-top:12px;">
           <button class="btn-outline" style="font-size:11px;" data-mark-done="${t.id}">
-            ${progress[t.id] ? '✓ Marked done' : '○ Mark as studied'}
+            ${progress[t.id] ? 'âœ“ Marked done' : 'â—‹ Mark as studied'}
           </button>
         </div>
       </div>
@@ -1988,7 +1017,7 @@ function buildTopics() {
 function markDone(id, btn) {
   progress[id] = !progress[id];
   saveProgress();
-  btn.textContent = progress[id] ? '✓ Marked done' : '○ Mark as studied';
+  btn.textContent = progress[id] ? 'âœ“ Marked done' : 'â—‹ Mark as studied';
   buildProgressTracker();
 }
 
@@ -2051,7 +1080,7 @@ function buildQuizSetup() {
   const el = document.getElementById('topic-select');
   el.innerHTML = DATA.topics.map(t => `
     <div class="ts-item selected" id="ts-${t.id}" data-toggle-ts="${t.id}">
-      <span class="ts-check" id="tsc-${t.id}">✓</span>
+      <span class="ts-check" id="tsc-${t.id}">âœ“</span>
       ${t.name}
     </div>
   `).join('');
@@ -2061,13 +1090,13 @@ function toggleTopicSelect(id) {
   const el = document.getElementById('ts-' + id);
   const check = document.getElementById('tsc-' + id);
   el.classList.toggle('selected');
-  check.textContent = el.classList.contains('selected') ? '✓' : '';
+  check.textContent = el.classList.contains('selected') ? 'âœ“' : '';
 }
 
 function selectAllTopics() {
   DATA.topics.forEach(t => {
     document.getElementById('ts-' + t.id).classList.add('selected');
-    document.getElementById('tsc-' + t.id).textContent = '✓';
+    document.getElementById('tsc-' + t.id).textContent = 'âœ“';
   });
 }
 
@@ -2139,13 +1168,13 @@ function selectOpt(idx) {
   if (idx === q.ans) {
     btns[idx].classList.add('correct');
     fb.className = 'feedback correct';
-    fb.textContent = '✓ Correct! ' + (q.exp || '');
+    fb.textContent = 'âœ“ Correct! ' + (q.exp || '');
     quizScore++;
   } else {
     btns[idx].classList.add('wrong');
     btns[q.ans].classList.add('correct');
     fb.className = 'feedback wrong';
-    fb.textContent = '✗ The correct answer is: ' + q.opts[q.ans] + (q.exp ? ' — ' + q.exp : '');
+    fb.textContent = 'âœ— The correct answer is: ' + q.opts[q.ans] + (q.exp ? ' â€” ' + q.exp : '');
   }
   fb.style.display = '';
   document.getElementById('next-btn').classList.add('show');
@@ -2172,11 +1201,11 @@ function showScore() {
   const color = pct >= 70 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
   document.getElementById('score-big').style.color = color;
   document.getElementById('score-big').textContent = pct + '%';
-  const msgs = pct === 100 ? '🏆 Perfect score! You are ready for the exam!' :
-    pct >= 80 ? '🎉 Excellent! A well-deserved high score.' :
-    pct >= 70 ? '👍 Good work! Review the ones you missed.' :
-    pct >= 50 ? '📚 Keep studying — you\'re halfway there!' :
-    '💪 Don\'t give up! Review the topics and try again.';
+  const msgs = pct === 100 ? 'ðŸ† Perfect score! You are ready for the exam!' :
+    pct >= 80 ? 'ðŸŽ‰ Excellent! A well-deserved high score.' :
+    pct >= 70 ? 'ðŸ‘ Good work! Review the ones you missed.' :
+    pct >= 50 ? 'ðŸ“š Keep studying â€” you\'re halfway there!' :
+    'ðŸ’ª Don\'t give up! Review the topics and try again.';
   document.getElementById('score-msg').textContent = msgs;
   document.getElementById('sb-correct').textContent = quizScore;
   document.getElementById('sb-wrong').textContent = quizQs.length - quizScore;
@@ -2203,8 +1232,8 @@ function buildPastExams() {
   const el = document.getElementById('past-exams-list');
   el.innerHTML = DATA.pastExams.map((exam, ei) => `
     <div class="exam-year-header">
-      <span class="exam-year-badge">${exam.year.split('—')[0].trim()}</span>
-      <span class="exam-year-title">${exam.year.split('—')[1] ? '— ' + exam.year.split('—')[1].trim() : ''}</span>
+      <span class="exam-year-badge">${exam.year.split('â€”')[0].trim()}</span>
+      <span class="exam-year-title">${exam.year.split('â€”')[1] ? 'â€” ' + exam.year.split('â€”')[1].trim() : ''}</span>
     </div>
     ${exam.questions.map((q, qi) => `
       <div class="exam-q-card">
@@ -2212,7 +1241,7 @@ function buildPastExams() {
           <div class="exam-q-text">${qi + 1}. ${q.q}</div>
           <div class="exam-q-meta">
             <span class="badge ${['hot','warm','cool'][qi % 3]}">Q${qi+1}</span>
-            <span class="chevron" id="eqc-${ei}-${qi}">›</span>
+            <span class="chevron" id="eqc-${ei}-${qi}">â€º</span>
           </div>
         </div>
         <div class="exam-q-body" id="eq-${ei}-${qi}">
@@ -2220,10 +1249,10 @@ function buildPastExams() {
             <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Options:</div>
             ${q.opts.map((o, oi) => `
               <div style="font-size:12.5px;padding:5px 10px;border-radius:6px;margin-bottom:4px;background:${oi === q.ans ? 'var(--green-glow)' : 'var(--surface2)'};border:1px solid ${oi === q.ans ? 'rgba(74,222,128,0.25)' : 'var(--border)'};color:${oi === q.ans ? 'var(--green)' : 'var(--muted)'};">
-                ${['A','B','C','D','E'][oi]}. ${o} ${oi === q.ans ? '✓' : ''}
+                ${['A','B','C','D','E'][oi]}. ${o} ${oi === q.ans ? 'âœ“' : ''}
               </div>
             `).join('')}
-            ${q.exp ? `<div style="margin-top:10px;background:var(--surface2);border-left:3px solid var(--accent);padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:var(--muted);">💡 ${q.exp}</div>` : ''}
+            ${q.exp ? `<div style="margin-top:10px;background:var(--surface2);border-left:3px solid var(--accent);padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:var(--muted);">ðŸ’¡ ${q.exp}</div>` : ''}
           </div>
         </div>
       </div>
@@ -2251,7 +1280,7 @@ function buildSectionC() {
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
           <div class="sc-marks">[${item.marks}]</div>
-          <span class="chevron" id="scc-${i}">›</span>
+          <span class="chevron" id="scc-${i}">â€º</span>
         </div>
       </div>
       <div class="sc-body" id="sc-${i}">
@@ -2390,7 +1419,7 @@ buildProgressTracker();
     var el = e.target.closest('[data-goto-topic],[data-toggle-topic],[data-toggle-ans],[data-mark-done],[data-toggle-progress],[data-toggle-ts],[data-select-opt],[data-toggle-exam-q],[data-toggle-sc]');
     if (!el) return;
 
-    // Home topic card → go to topic
+    // Home topic card â†’ go to topic
     if (el.dataset.gotoTopic) {
       goToTopic(el.dataset.gotoTopic);
       return;
@@ -2448,6 +1477,4 @@ buildProgressTracker();
     }
   });
 })();
-</script>
-</body>
-</html>
+
