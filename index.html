@@ -1918,10 +1918,19 @@ function buildProgressTracker() {
 // PAGE NAV
 // ===================================
 function showPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  try {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const targetPage = document.getElementById('page-' + id);
+    if (!targetPage) {
+      console.error('Page not found: page-' + id);
+      return;
+    }
+    targetPage.classList.add('active');
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  } catch (e) {
+    console.error('Error in showPage:', e, 'id:', id);
+  }
 }
 
 // ===================================
