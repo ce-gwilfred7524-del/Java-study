@@ -2335,14 +2335,55 @@ function hideAllAnswers() {
 // ===================================
 // INIT
 // ===================================
-buildHome();
-buildTopics();
-buildQuizSetup();
-buildCheatsheet();
-buildFillBlanks();
-buildPastExams();
-buildSectionC();
-buildProgressTracker();
+try {
+  buildHome();
+  console.log('✓ buildHome completed');
+} catch (e) {
+  console.error('✗ buildHome failed:', e);
+}
+try {
+  buildTopics();
+  console.log('✓ buildTopics completed');
+} catch (e) {
+  console.error('✗ buildTopics failed:', e);
+}
+try {
+  buildQuizSetup();
+  console.log('✓ buildQuizSetup completed');
+} catch (e) {
+  console.error('✗ buildQuizSetup failed:', e);
+}
+try {
+  buildCheatsheet();
+  console.log('✓ buildCheatsheet completed');
+} catch (e) {
+  console.error('✗ buildCheatsheet failed:', e);
+}
+try {
+  buildFillBlanks();
+  console.log('✓ buildFillBlanks completed');
+} catch (e) {
+  console.error('✗ buildFillBlanks failed:', e);
+}
+try {
+  buildPastExams();
+  console.log('✓ buildPastExams completed');
+} catch (e) {
+  console.error('✗ buildPastExams failed:', e);
+}
+try {
+  buildSectionC();
+  console.log('✓ buildSectionC completed');
+} catch (e) {
+  console.error('✗ buildSectionC failed:', e);
+}
+try {
+  buildProgressTracker();
+  console.log('✓ buildProgressTracker completed');
+} catch (e) {
+  console.error('✗ buildProgressTracker failed:', e);
+}
+console.log('All initialization attempts completed. Navigation should work now.');
 </script>
 </body>
 </html>
