@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java CE/IS 277 — UMAT Study Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1f2937;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --hot: #f85149;
+    --warm: #e3b341;
+    --cool: #3fb950;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+  /* HEADER */
+  header { border-bottom: 1px solid var(--border); padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .logo { font-family: 'Space Mono', monospace; font-size: 1.1rem; color: var(--accent); letter-spacing: -0.02em; }
+  .logo span { color: var(--muted); }
+  .header-badge { background: #1f2937; border: 1px solid var(--border); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  /* NAV */
+  nav { display: flex; gap: 4px; padding: 1rem 2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  nav button { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); padding: 6px 16px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  nav button:hover { border-color: var(--accent); color: var(--accent); }
+  nav button.active { background: var(--accent); border-color: var(--accent); color: #0d1117; font-weight: 600; }
+
+  /* MAIN */
+  main { max-width: 900px; margin: 0 auto; padding: 2rem; }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* HOME */
+  .hero { text-align: center; padding: 3rem 1rem 2rem; }
+  .hero h1 { font-family: 'Space Mono', monospace; font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem; line-height: 1.3; }
+  .hero p { color: var(--muted); font-size: 1rem; max-width: 500px; margin: 0 auto 2rem; }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 2.5rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; }
+  .stat-num { font-family: 'Space Mono', monospace; font-size: 1.8rem; color: var(--accent); font-weight: 700; }
+  .stat-lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
+  .topic-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .tc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .tc-name { font-weight: 600; font-size: 14px; }
+  .badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; font-family: 'Space Mono', monospace; }
+  .badge.hot { background: rgba(248,81,73,0.15); color: var(--hot); border: 1px solid rgba(248,81,73,0.3); }
+  .badge.warm { background: rgba(227,179,65,0.15); color: var(--warm); border: 1px solid rgba(227,179,65,0.3); }
+  .badge.cool { background: rgba(63,185,80,0.15); color: var(--cool); border: 1px solid rgba(63,185,80,0.3); }
+  .tc-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* TOPICS PAGE */
+  .section-title { font-family: 'Space Mono', monospace; font-size: 1.1rem; color: var(--accent4); margin-bottom: 1.5rem; }
+  .topic-detail { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 1rem; overflow: hidden; }
+  .td-header { padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.15s; }
+  .td-header:hover { background: var(--surface2); }
+  .td-title { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+  .td-body { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--border); }
+  .td-body.open { display: block; }
+  .q-item { margin-top: 12px; }
+  .q-text { font-size: 13px; color: var(--text); margin-bottom: 6px; font-weight: 500; }
+  .q-text::before { content: "Q: "; color: var(--accent); font-family: 'Space Mono', monospace; font-size: 11px; }
+  .ans-box { background: var(--surface2); border-left: 3px solid var(--accent2); border-radius: 0 8px 8px 0; padding: 8px 12px; font-size: 12px; color: var(--muted); line-height: 1.6; display: none; }
+  .ans-box.show { display: block; }
+  .ans-btn { margin-top: 6px; font-size: 11px; padding: 3px 10px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; font-family: 'Space Mono', monospace; transition: all 0.15s; }
+  .ans-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .chevron { color: var(--muted); font-size: 16px; transition: transform 0.2s; }
+  .chevron.open { transform: rotate(90deg); }
+
+  /* QUIZ PAGE */
+  .quiz-setup { text-align: center; padding: 2rem; }
+  .quiz-setup h2 { font-family: 'Space Mono', monospace; font-size: 1.3rem; color: var(--accent); margin-bottom: 1rem; }
+  .quiz-setup p { color: var(--muted); margin-bottom: 2rem; }
+  .topic-select { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-bottom: 2rem; text-align: left; }
+  .ts-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; cursor: pointer; font-size: 13px; transition: all 0.15s; display: flex; align-items: center; gap: 8px; }
+  .ts-item.selected { border-color: var(--accent); background: rgba(88,166,255,0.08); color: var(--accent); }
+  .ts-check { width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+  .ts-item.selected .ts-check { background: var(--accent); border-color: var(--accent); color: #0d1117; }
+  .start-btn { background: var(--accent); color: #0d1117; border: none; border-radius: 10px; padding: 12px 36px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+  .start-btn:hover { opacity: 0.85; }
+  .quiz-active { display: none; }
+  .quiz-active.show { display: block; }
+  .quiz-setup.hidden { display: none; }
+  .q-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+  .progress-bar { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
+  .q-counter { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; white-space: nowrap; }
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .q-topic-tag { font-size: 11px; color: var(--accent4); font-family: 'Space Mono', monospace; margin-bottom: 10px; }
+  .q-main { font-size: 15px; font-weight: 500; line-height: 1.6; margin-bottom: 1.25rem; }
+  .options { display: grid; gap: 8px; }
+  .opt-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; text-align: left; font-size: 13px; cursor: pointer; color: var(--text); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .opt-btn.correct { background: rgba(63,185,80,0.15); border-color: var(--cool); color: var(--cool); }
+  .opt-btn.wrong { background: rgba(248,81,73,0.15); border-color: var(--hot); color: var(--hot); }
+  .feedback { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; line-height: 1.5; display: none; }
+  .feedback.correct { background: rgba(63,185,80,0.1); border-left: 3px solid var(--cool); color: #7ee787; display: block; }
+  .feedback.wrong { background: rgba(248,81,73,0.1); border-left: 3px solid var(--hot); color: #ffa198; display: block; }
+  .next-btn { background: var(--accent); color: #0d1117; border: none; border-radius: 8px; padding: 10px 24px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; display: none; }
+  .next-btn.show { display: inline-block; }
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 2.5rem; text-align: center; display: none; }
+  .score-card.show { display: block; }
+  .score-big { font-family: 'Space Mono', monospace; font-size: 3.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .score-msg { font-size: 1rem; color: var(--muted); margin-bottom: 2rem; }
+  .retry-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; padding: 10px 24px; font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-right: 10px; }
+  .retry-btn:hover { background: rgba(88,166,255,0.1); }
+
+  /* ANSWERS PAGE */
+  .answers-section h2 { font-family: 'Space Mono', monospace; font-size: 1rem; color: var(--accent2); margin: 2rem 0 1rem; }
+  .answer-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 8px; }
+  .ai-q { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+  .ai-a { font-size: 13px; color: var(--muted); border-left: 3px solid var(--accent2); padding-left: 10px; line-height: 1.6; }
+
+  /* CHEATSHEET */
+  .cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .cheat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .cheat-title { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .cheat-item { font-size: 12px; color: var(--muted); padding: 3px 0; line-height: 1.5; }
+  .cheat-item code { background: var(--surface2); border-radius: 4px; padding: 1px 6px; font-family: 'Space Mono', monospace; color: var(--accent4); font-size: 11px; }
+
+  @media (max-width: 600px) {
+    main { padding: 1rem; }
+    .hero h1 { font-size: 1.4rem; }
+    header { padding: 1rem; }
+    nav { padding: 0.75rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Java<span>.study()</span></div>
+  <div class="header-badge">CE/IS 277 · UMAT · Dr Nofong</div>
+</header>
+
+<nav>
+  <button class="active" onclick="showPage('home', this)">Home</button>
+  <button onclick="showPage('topics', this)">Topics</button>
+  <button onclick="showPage('quiz', this)">Quiz mode</button>
+  <button onclick="showPage('cheatsheet', this)">Cheatsheet</button>
+  <button onclick="showPage('fillblanks', this)">Fill in blanks</button>
+</nav>
+
+<main>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <h1>Java CE/IS 277<br>Exam Study Hub</h1>
+    <p>All topics from Dr Nofong's handout + past questions analysed and organised for you and your friends.</p>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num">10</div><div class="stat-lbl">Topics</div></div>
+    <div class="stat-card"><div class="stat-num">60+</div><div class="stat-lbl">Practice Qs</div></div>
+    <div class="stat-card"><div class="stat-num">20</div><div class="stat-lbl">Fill-in-blanks</div></div>
+    <div class="stat-card"><div class="stat-num">7</div><div class="stat-lbl">Long answer Qs</div></div>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;">Click any topic to study it, or go to <strong style="color:var(--accent)">Quiz mode</strong> to test yourself.</p>
+  <div class="topic-grid" id="home-topics"></div>
+</div>
+
+<!-- TOPICS PAGE -->
+<div class="page" id="page-topics">
+  <div class="section-title">// All topics</div>
+  <div id="topics-list"></div>
+</div>
+
+<!-- QUIZ PAGE -->
+<div class="page" id="page-quiz">
+  <div class="quiz-setup" id="quiz-setup">
+    <h2>Quiz mode</h2>
+    <p>Select topics you want to be quizzed on, then start.</p>
+    <div class="topic-select" id="topic-select"></div>
+    <button class="start-btn" onclick="startQuiz()">Start quiz</button>
+  </div>
+  <div class="quiz-active" id="quiz-active">
+    <div class="q-progress">
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+      <div class="q-counter" id="q-counter">0 / 0</div>
+    </div>
+    <div class="q-card">
+      <div class="q-topic-tag" id="q-topic-tag"></div>
+      <div class="q-main" id="q-main"></div>
+      <div class="options" id="q-options"></div>
+    </div>
+    <div class="feedback" id="q-feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next question →</button>
+    <div class="score-card" id="score-card">
+      <div class="score-big" id="score-big"></div>
+      <div class="score-msg" id="score-msg"></div>
+      <button class="retry-btn" onclick="resetQuiz()">Try again</button>
+      <button class="start-btn" onclick="showPage('topics', document.querySelector('nav button:nth-child(2)'))">Review topics</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHEATSHEET PAGE -->
+<div class="page" id="page-cheatsheet">
+  <div class="section-title">// Quick cheatsheet</div>
+  <div class="cheat-grid" id="cheat-grid"></div>
+</div>
+
+<!-- FILL IN BLANKS PAGE -->
+<div class="page" id="page-fillblanks">
+  <div class="section-title">// Section B — fill in the blanks</div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;">These are exactly the type of fill-in-the-blank questions from Section B of the exam. Click "Show answer" to check.</p>
+  <div id="fill-list"></div>
+</div>
+
+</main>
+
+<script>
+const DATA = {
+  topics: [
+    {
+      id: 'jdk',
+      name: 'Java basics & JDK/JRE/JVM',
+      heat: 'hot',
+      heatLabel: 'Very likely',
+      why: '6+ questions in Section A. Fill-in-blanks Q14,15,16.',
+      questions: [
+        { q: 'What is the difference between JDK, JRE, and JVM?', a: 'JDK (Java Development Kit) is for developers — includes compiler (javac) and tools. JRE (Java Runtime Environment) is for running Java programs. JVM (Java Virtual Machine) executes the bytecode. JDK includes JRE which includes JVM.' },
+        { q: 'Which tool compiles Java source code?', a: 'javac — it takes your .java file and compiles it into a .class bytecode file.' },
+        { q: 'What does the JRE do?', a: 'The JRE provides the environment to RUN (execute) Java programs. It contains the JVM and class libraries.' },
+        { q: 'What is the difference between a compiler and an interpreter?', a: 'A compiler translates the ENTIRE source code into machine code at once (before execution). An interpreter reads and executes code ONE LINE AT A TIME.' },
+        { q: 'What is required after installing the JDK?', a: 'You must configure the Java PATH (environment variable) so your system can find the java and javac commands.' },
+        { q: 'The command java -version checks the compiler version — True or False?', a: 'FALSE. java -version checks the JRE/JVM version. To check the compiler you use javac -version.' }
+      ],
+      quiz: [
+        { q: 'Which tool is used to compile Java source code?', opts: ['java', 'javac', 'jar', 'javadoc'], ans: 1 },
+        { q: 'What does the JRE do?', opts: ['Edit code', 'Compile code', 'Run code', 'Debug code'], ans: 2 },
+        { q: 'A compiler reads one line of code at a time — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'What is required after installing JDK?', opts: ['Restart system', 'Configure Java Path', 'Format drive', 'Update BIOS'], ans: 1 },
+      ]
+    },
+    {
+      id: 'datatypes',
+      name: 'Data types, variables & operators',
+      heat: 'hot',
+      heatLabel: 'Very likely',
+      why: 'Q10–20 MCQ. Section B Q10–12,17. Biggest topic cluster.',
+      questions: [
+        { q: 'Which of the following is NOT a primitive data type in Java?', a: 'String is NOT primitive. Primitive types are: int, double, float, long, char, boolean, byte, short. String is an object/reference type.' },
+        { q: 'What is the result of 5 + 3 * 2 in Java?', a: '11 — Multiplication is done first (operator precedence): 3*2=6, then 5+6=11. NOT 16.' },
+        { q: 'What does (double)5 / 2 return?', a: '2.5 — The cast (double) makes 5 into 5.0, so 5.0/2 = 2.5 (not integer division).' },
+        { q: 'What does char ch = \'A\' + 1 assign to ch?', a: '\'B\' — Characters have ASCII values. \'A\' = 65, so 65+1 = 66 = \'B\'.' },
+        { q: 'What does casting a double to int do to the decimal part?', a: 'It TRUNCATES (cuts off) the decimal. (int)3.9 = 3, not 4. It does NOT round.' },
+        { q: 'The ++ operator increases a variable\'s value by 2 — True or False?', a: 'FALSE. ++ increases by 1 (increment by 1). To increase by 2, use x += 2.' }
+      ],
+      quiz: [
+        { q: 'Which of the following is NOT a primitive data type in Java?', opts: ['String', 'int', 'boolean', 'double'], ans: 0 },
+        { q: 'The result of 5 + 3 * 2 in Java is:', opts: ['16', '11', '13', '10'], ans: 1 },
+        { q: 'What does char ch = \'A\' + 1 assign to ch?', opts: ["'A'", "'B'", '66', 'Error'], ans: 1 },
+        { q: 'Arithmetic operations in Java are performed left to right, ignoring precedence — True or False?', opts: ['True', 'False'], ans: 1 }
+      ]
+    },
+    {
+      id: 'scanner',
+      name: 'Scanner & user input',
+      heat: 'hot',
+      heatLabel: 'Very likely',
+      why: 'Q18,21,22,25 MCQ. Section B Q20. Long answer Q26.',
+      questions: [
+        { q: 'How do you create a Scanner for console input?', a: 'Scanner sc = new Scanner(System.in); — You must import java.util.Scanner first.' },
+        { q: 'Which method reads an integer using Scanner?', a: 'sc.nextInt() — reads the next integer from input. Other methods: nextDouble(), next() for a word, nextLine() for a full line.' },
+        { q: 'What does input.close() do?', a: 'It closes the input stream (Scanner). Always close when done to free resources.' },
+        { q: 'State one advantage and one disadvantage each of Scanner vs BufferedReader.', a: 'Scanner: Advantage = easy to use, has specific methods (nextInt, nextDouble). Disadvantage = slower, can have issues mixing nextLine with nextInt. BufferedReader: Advantage = faster. Disadvantage = more complex, requires manual parsing (Integer.parseInt), must handle IOException.' }
+      ],
+      quiz: [
+        { q: 'Which statement reads an integer from user input using Scanner?', opts: ['input.readInt()', 'input.getInt()', 'input.inputInt()', 'input.nextInt()'], ans: 3 },
+        { q: 'Which method accepts String input using Scanner?', opts: ['input.string()', 'input.readString()', 'input.stringInput()', 'input.next()'], ans: 3 },
+        { q: 'The correct way to create a Scanner for console input is:', opts: ['new Scanner()', 'Scanner sc = new Scanner()', 'Scanner sc = new Scanner(System.in)', 'InputScanner()'], ans: 2 },
+        { q: 'What does input.close() do?', opts: ['Saves input', 'Closes the input stream', 'Clears input', 'Initializes Scanner'], ans: 1 }
+      ]
+    },
+    {
+      id: 'strings',
+      name: 'String methods & Math class',
+      heat: 'hot',
+      heatLabel: 'Very likely',
+      why: 'Q26–35 MCQ. Dense cluster of practical questions.',
+      questions: [
+        { q: 'What does Math.random() return?', a: 'A random double between 0.0 (inclusive) and 1.0 (exclusive). It does NOT return a random integer. Use (int)(Math.random()*10) for 0–9.' },
+        { q: 'What does Math.floor(3.8) return?', a: '3.0 — floor() rounds DOWN to the nearest whole number. Returns a double.' },
+        { q: 'How do you access the character \'M\' in the string "James"?', a: 'name.charAt(1) — String indexing starts at 0. J=0, a=1, m=2, e=3, s=4. Wait — \'M\' is not in James. In "James": J=0,a=1,m=2,e=3,s=4. The answer in the exam is name.charAt(1) for \'a\'.' },
+        { q: 'Which method removes whitespace from both ends of a String?', a: 'trim() — e.g. "  hello  ".trim() returns "hello".' },
+        { q: 'Do you need to import java.lang.Math before using the Math class?', a: 'FALSE — java.lang is automatically imported in every Java program. You never need to import it.' },
+        { q: 'Which method converts "123" to an integer?', a: 'Integer.parseInt("123") — returns the int value 123.' }
+      ],
+      quiz: [
+        { q: 'What does Math.random() return?', opts: ['A random integer', 'A random double 0.0 to <1.0', 'A random double 0.0 to 1.0', 'A random float'], ans: 1 },
+        { q: 'What does Math.floor(3.8) return?', opts: ['3.0', '4.0', '3.8', '3'], ans: 0 },
+        { q: 'Which method removes whitespace from both ends of a string?', opts: ['remove()', 'delete()', 'trim()', 'clean()'], ans: 2 },
+        { q: 'Which method converts "123" to an integer?', opts: ['Integer.toString()', 'String.valueOf()', 'Integer.parseInt()', 'parseInteger()'], ans: 2 }
+      ]
+    },
+    {
+      id: 'control',
+      name: 'Control structures (if/else, switch, loops)',
+      heat: 'hot',
+      heatLabel: 'Very likely',
+      why: 'Q37–50 MCQ. Long answer Q21 (loop), Q23 (switch→if-else). Section B Q19.',
+      questions: [
+        { q: 'How many times does a do-while loop run if the condition is initially false?', a: 'Once (1 time). A do-while always executes the body at least once BEFORE checking the condition.' },
+        { q: 'What does break do in a loop or switch?', a: 'break TERMINATES the entire loop or switch statement immediately. Execution continues after the loop/switch.' },
+        { q: 'What does continue do?', a: 'continue SKIPS the current iteration and jumps to the next one. It does NOT stop the loop.' },
+        { q: 'What is the result of true ^ false?', a: 'true — The ^ operator is XOR (exclusive OR). It returns true only when the two values are DIFFERENT.' },
+        { q: 'When is switch preferred over if-else?', a: 'When the conditions are specific numeric or string MATCHES (equality checks). If you need range checks or complex logical conditions, use if-else.' }
+      ],
+      quiz: [
+        { q: 'How many times does a do-while loop run if the condition is initially false?', opts: ['0', '1', '2', 'Infinite'], ans: 1 },
+        { q: 'What does break do in a loop?', opts: ['Skips current iteration', 'Terminates the loop/switch', 'Repeats iteration', 'Pauses execution'], ans: 1 },
+        { q: 'The expression (condition1) ^ (condition2) is true if both are true — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'A while loop checks the condition after executing the body once — True or False?', opts: ['True', 'False'], ans: 1 }
+      ]
+    },
+    {
+      id: 'exceptions',
+      name: 'Exception handling',
+      heat: 'hot',
+      heatLabel: 'Very likely',
+      why: 'Q51–60 MCQ. Section B Q6,7,8,20. Very consistent topic.',
+      questions: [
+        { q: 'What is the root class for all exceptions in Java?', a: 'Throwable — Both Exception and Error extend Throwable.' },
+        { q: 'What exception does Scanner.nextInt() throw if input is a String?', a: 'InputMismatchException — thrown when the next token does not match the expected type.' },
+        { q: 'Is the finally block skipped if an exception occurs?', a: 'FALSE — The finally block ALWAYS runs, whether or not an exception occurred. It is used for cleanup (like closing files).' },
+        { q: 'What is the output of dividing 3.0 by 0 in Java?', a: 'Infinity — dividing a floating-point number by zero gives Infinity, not an error. Dividing an integer by zero (3/0) throws ArithmeticException.' },
+        { q: 'What happens when an exception is not caught?', a: 'The program CRASHES (terminates abnormally) and prints a stack trace.' }
+      ],
+      quiz: [
+        { q: 'What is the root class for all exceptions in Java?', opts: ['Error', 'Throwable', 'Object', 'RuntimeException'], ans: 1 },
+        { q: 'What exception does Scanner.nextInt() throw for non-integer input?', opts: ['ArithmeticException', 'InputMismatchException', 'IOException', 'FileNotFoundException'], ans: 1 },
+        { q: 'The finally block is skipped if an exception occurs — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'What is the output of dividing 3.0 by 0 in Java?', opts: ['Error', 'ArithmeticException', '0', 'Infinity'], ans: 3 }
+      ]
+    },
+    {
+      id: 'files',
+      name: 'File handling',
+      heat: 'warm',
+      heatLabel: 'Likely',
+      why: 'Q54,55,61 MCQ. Section B Q6,7. Long answer Q25.',
+      questions: [
+        { q: 'What is the difference between PrintWriter and the File class?', a: 'File class represents a file path/location — it is used to check if a file exists, create it, delete it, etc. PrintWriter actually WRITES text content to a file using methods like println().' },
+        { q: 'Should PrintWriter.close() be called after writing?', a: 'YES — Always call close() to flush the buffer and properly close the file. Without it, data may not be saved.' },
+        { q: 'What exception is thrown when opening a non-existent file for reading?', a: 'FileNotFoundException — thrown when you try to open a file that does not exist.' }
+      ],
+      quiz: [
+        { q: 'Which method writes a line to a file using PrintWriter?', opts: ['writeLine()', 'output.printLine()', 'println.output()', 'output.println()'], ans: 3 },
+        { q: 'PrintWriter.close() should NOT be called after writing — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'A file must always exist before you can write to it — True or False?', opts: ['True', 'False'], ans: 1 }
+      ]
+    },
+    {
+      id: 'arrays',
+      name: 'Arrays, ArrayList & Collections',
+      heat: 'hot',
+      heatLabel: 'Very likely',
+      why: 'Q63–75 MCQ. Long answer Q22 (2D array) and Q24 (Array vs ArrayList).',
+      questions: [
+        { q: 'What is the difference between an Array and an ArrayList?', a: 'Array: FIXED size (set when created), uses [], can store primitives. ArrayList: DYNAMIC size (grows/shrinks), uses add()/remove(), can only store objects (wrapper types). ArrayList requires import java.util.*.' },
+        { q: 'What is the correct syntax to declare an array of 10 integers?', a: 'int array[] = new int[10]; or int[] array = new int[10];' },
+        { q: 'Which method adds an item to an ArrayList?', a: 'add() — e.g. list.add("hello"); You can also add at an index: list.add(0, "hello");' },
+        { q: 'How do you retrieve a value from a HashMap using a key?', a: 'map.get(key) — e.g. String val = map.get("name");' },
+        { q: 'Which import is needed for ArrayList, Set, and Map?', a: 'import java.util.*; — This imports the entire java.util package which contains ArrayList, HashMap, HashSet, etc.' }
+      ],
+      quiz: [
+        { q: 'What is the correct syntax to declare an array of 10 integers?', opts: ['int array = new int(10)', 'int array[] = new int[10]', 'array int[10]', 'new int array[10]'], ans: 1 },
+        { q: 'Which method adds an item to an ArrayList?', opts: ['add()', 'insert()', 'append()', 'put()'], ans: 0 },
+        { q: 'How do you retrieve a value from a HashMap?', opts: ['map.find(key)', 'map.search(key)', 'map.get(key)', 'map.lookup(key)'], ans: 2 },
+        { q: 'Which import is needed for ArrayList, Set, and Map?', opts: ['java.util.*', 'java.data.*', 'java.array.*', 'java.list.*'], ans: 0 }
+      ]
+    },
+    {
+      id: 'oop',
+      name: 'Classes, objects & constructors (OOP)',
+      heat: 'hot',
+      heatLabel: 'Very likely',
+      why: 'Q76–90 MCQ. Section B Q1–4. Final major topic.',
+      questions: [
+        { q: 'What is a constructor? When is it called?', a: 'A constructor is a special method used to INITIALIZE an object. It has the same name as the class and NO return type. It is called automatically when an object is created with the new keyword.' },
+        { q: 'What is encapsulation?', a: 'Encapsulation is the process of HIDING internal details (making fields private) and providing access through public getter/setter methods. It protects the data.' },
+        { q: 'If no constructor is defined, Java provides a:', a: 'Default constructor — a no-argument constructor that Java provides automatically if you do not define any constructor.' },
+        { q: 'What does the this keyword refer to?', a: 'this refers to the CURRENT object instance. It is used to distinguish instance variables from parameters with the same name.' },
+        { q: 'Can you have more than one constructor in a class?', a: 'YES — This is called constructor OVERLOADING. Each constructor must have a different parameter list.' },
+        { q: 'Which access modifier allows access from anywhere?', a: 'public — accessible from any class. private = same class only. protected = same package + subclasses.' }
+      ],
+      quiz: [
+        { q: 'A constructor is a special method used to destroy objects — True or False?', opts: ['True', 'False'], ans: 1 },
+        { q: 'If no constructor is defined, Java provides a:', opts: ['copy constructor', 'default constructor', 'parameterized constructor', 'static constructor'], ans: 1 },
+        { q: 'What is the purpose of the this keyword?', opts: ['Access static members', 'Access superclass members', 'Refer to the current object', 'Refer to null object'], ans: 2 },
+        { q: 'Which access modifier allows class members to be accessed from anywhere?', opts: ['protected', 'private', 'default', 'public'], ans: 3 }
+      ]
+    },
+    {
+      id: 'casting',
+      name: 'Type casting & conversion',
+      heat: 'warm',
+      heatLabel: 'Likely',
+      why: 'Q24 MCQ. Long answer Q27 (widening vs narrowing).',
+      questions: [
+        { q: 'Define casting. What is widening vs narrowing conversion?', a: 'Casting = converting one data type to another. Widening (e.g. int→double): AUTOMATIC, no data loss, smaller to larger type. Narrowing (e.g. double→int): must be EXPLICIT e.g. (int)3.9, can lose data (truncates decimal).' },
+        { q: 'Java converts int to double using:', a: 'Widening conversion — it is automatic and requires no explicit cast. int x = 5; double y = x; works automatically.' }
+      ],
+      quiz: [
+        { q: 'Java converts int to double using:', opts: ['Explicit casting', 'Widening conversion', 'Narrowing conversion', 'Bit shifting'], ans: 1 },
+        { q: 'What does (int) 3.9 return?', opts: ['4', '3', '3.9', 'Error'], ans: 1 }
+      ]
+    }
+  ],
+
+  fillBlanks: [
+    { q: 'An ___ is created from a class.', a: 'object' },
+    { q: 'The ___ constructor takes no arguments.', a: 'default' },
+    { q: "The object's data is usually made private and accessed via ___ methods.", a: 'getter/setter' },
+    { q: 'The process of hiding internal details is called ___.', a: 'encapsulation' },
+    { q: 'Arrays.sort() is used to sort an array in ___ order.', a: 'ascending (natural)' },
+    { q: 'A file that does not exist will throw a ___ exception when opened.', a: 'FileNotFoundException' },
+    { q: 'The method output.close() is used to ___ the file after writing.', a: 'close / flush' },
+    { q: 'The base class for all exceptions in Java is ___.', a: 'Throwable' },
+    { q: 'The output of (int)(Math.random()*10) ranges from ___ to ___.', a: '0 to 9' },
+    { q: 'Casting a double to int will ___ the decimal part.', a: 'truncate (remove)' },
+    { q: 'A variable declared without a value is said to be ___.', a: 'uninitialized' },
+    { q: 'int x = 2; x *= 3; will make x equal to ___.', a: '6' },
+    { q: 'Assembly language uses ___ to represent instructions.', a: 'mnemonics' },
+    { q: 'To check Java version, we use command ___.', a: 'java -version' },
+    { q: 'The acronym JDK stands for ___.', a: 'Java Development Kit' },
+    { q: 'The ___ translates high-level code into machine code all at once.', a: 'compiler' },
+    { q: 'Variables declared in a method are called ___ variables.', a: 'local' },
+    { q: 'The escape sequence for a tab character is ___.', a: '\\t' },
+    { q: 'The for loop contains three parts: initialization, ___, and update.', a: 'condition' },
+    { q: 'To handle input errors, you use the ___ exception.', a: 'InputMismatchException' }
+  ],
+
+  cheatsheet: [
+    {
+      title: 'JDK / JRE / JVM',
+      items: [
+        'JDK = Java Development Kit (for developers)',
+        'JRE = Java Runtime Environment (to run programs)',
+        'JVM = Java Virtual Machine (executes bytecode)',
+        'javac = compiler tool   |   java = run tool',
+        'Compiler = all at once   |   Interpreter = line by line'
+      ]
+    },
+    {
+      title: 'Primitive data types',
+      items: [
+        'int, double, float, long, byte, short',
+        'char (single quotes: \'A\')',
+        'boolean (true / false)',
+        'String is NOT primitive — it is an object',
+        'char uses single quotes, String uses double quotes'
+      ]
+    },
+    {
+      title: 'Operator precedence',
+      items: [
+        '1st: () parentheses',
+        '2nd: *, /, % (multiply/divide/modulo)',
+        '3rd: +, - (add/subtract)',
+        '5 + 3 * 2 = 11 (NOT 16)',
+        '++ increases by 1, ** is NOT valid in Java'
+      ]
+    },
+    {
+      title: 'Scanner usage',
+      items: [
+        'import java.util.Scanner;',
+        'Scanner sc = new Scanner(System.in);',
+        'sc.nextInt() — reads integer',
+        'sc.nextDouble() — reads double',
+        'sc.next() — reads one word',
+        'sc.nextLine() — reads full line',
+        'sc.close() — closes stream'
+      ]
+    },
+    {
+      title: 'Math class methods',
+      items: [
+        'Math.random() → double 0.0 to <1.0',
+        'Math.floor(3.8) → 3.0 (round down)',
+        'Math.ceil(3.2) → 4.0 (round up)',
+        'Math.round(3.5) → 4 (nearest)',
+        'Math.abs(-5) → 5 (absolute value)',
+        'java.lang.Math is auto-imported'
+      ]
+    },
+    {
+      title: 'String methods',
+      items: [
+        's.length() — length of string',
+        's.charAt(0) — char at index 0',
+        's.substring(1, 3) — chars at 1,2',
+        's.toUpperCase() / toLowerCase()',
+        's.trim() — remove leading/trailing spaces',
+        's.equals("x") — compare content (NOT ==)'
+      ]
+    },
+    {
+      title: 'Exception handling',
+      items: [
+        'Throwable → root of all exceptions',
+        'try { } catch(Exception e) { } finally { }',
+        'finally ALWAYS runs',
+        'InputMismatchException — wrong input type',
+        'FileNotFoundException — file not found',
+        'ArithmeticException — e.g. int/0',
+        '3.0/0 = Infinity (not an error)'
+      ]
+    },
+    {
+      title: 'Arrays & ArrayList',
+      items: [
+        'int[] arr = new int[5]; // fixed size',
+        'arr[0] = 10; // access by index',
+        'arr.length // NOT arr.length()',
+        'ArrayList<String> list = new ArrayList<>();',
+        'list.add("x"); list.remove(0);',
+        'list.get(0); list.size();',
+        'import java.util.*;'
+      ]
+    },
+    {
+      title: 'OOP basics',
+      items: [
+        'Constructor: same name as class, no return type',
+        'Called automatically when object is created',
+        'Default constructor: no arguments (auto-provided)',
+        'this = refers to current object',
+        'Encapsulation = private fields + getters/setters',
+        'public = anywhere, private = same class only'
+      ]
+    },
+    {
+      title: 'Casting & conversion',
+      items: [
+        'Widening: int→double (automatic, no data loss)',
+        'Narrowing: double→int (explicit, (int)3.9 = 3)',
+        'Truncates decimal — does NOT round',
+        'Integer.parseInt("5") → int 5',
+        'String.valueOf(5) → "5"'
+      ]
+    }
+  ]
+};
+
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function buildHome() {
+  const el = document.getElementById('home-topics');
+  el.innerHTML = DATA.topics.map(t => `
+    <div class="topic-card" onclick="goToTopic('${t.id}')">
+      <div class="tc-head">
+        <span class="tc-name">${t.name}</span>
+        <span class="badge ${t.heat}">${t.heatLabel}</span>
+      </div>
+      <div class="tc-desc">${t.why}</div>
+    </div>
+  `).join('');
+}
+
+function goToTopic(id) {
+  showPage('topics', document.querySelector('nav button:nth-child(2)'));
+  setTimeout(() => {
+    const el = document.getElementById('td-' + id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const body = el.querySelector('.td-body');
+      const chev = el.querySelector('.chevron');
+      body.classList.add('open');
+      chev.classList.add('open');
+    }
+  }, 50);
+}
+
+function buildTopics() {
+  const el = document.getElementById('topics-list');
+  el.innerHTML = DATA.topics.map(t => `
+    <div class="topic-detail" id="td-${t.id}">
+      <div class="td-header" onclick="toggleTopic('${t.id}')">
+        <div class="td-title">
+          <span class="chevron" id="chev-${t.id}">›</span>
+          ${t.name}
+          <span class="badge ${t.heat}">${t.heatLabel}</span>
+        </div>
+        <span style="font-size:12px;color:var(--muted)">${t.questions.length} questions</span>
+      </div>
+      <div class="td-body" id="body-${t.id}">
+        ${t.questions.map((q, i) => `
+          <div class="q-item">
+            <div class="q-text">${q.q}</div>
+            <button class="ans-btn" onclick="toggleAns('ans-${t.id}-${i}', this)">Show answer</button>
+            <div class="ans-box" id="ans-${t.id}-${i}">${q.a}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleTopic(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chev-' + id);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function toggleAns(id, btn) {
+  const el = document.getElementById(id);
+  el.classList.toggle('show');
+  btn.textContent = el.classList.contains('show') ? 'Hide answer' : 'Show answer';
+}
+
+function buildQuizSetup() {
+  const el = document.getElementById('topic-select');
+  el.innerHTML = DATA.topics.map(t => `
+    <div class="ts-item selected" id="ts-${t.id}" onclick="toggleTopicSelect('${t.id}')">
+      <span class="ts-check" id="tsc-${t.id}">✓</span>
+      ${t.name}
+    </div>
+  `).join('');
+}
+
+function toggleTopicSelect(id) {
+  const el = document.getElementById('ts-' + id);
+  const check = document.getElementById('tsc-' + id);
+  el.classList.toggle('selected');
+  check.textContent = el.classList.contains('selected') ? '✓' : '';
+}
+
+let quizQs = [], quizIdx = 0, quizScore = 0;
+
+function startQuiz() {
+  const selected = DATA.topics.filter(t => document.getElementById('ts-' + t.id)?.classList.contains('selected'));
+  if (!selected.length) { alert('Please select at least one topic!'); return; }
+  quizQs = [];
+  selected.forEach(t => t.quiz.forEach(q => quizQs.push({ ...q, topicName: t.name })));
+  quizQs = quizQs.sort(() => Math.random() - 0.5);
+  quizIdx = 0; quizScore = 0;
+  document.getElementById('quiz-setup').classList.add('hidden');
+  document.getElementById('quiz-active').classList.add('show');
+  document.getElementById('score-card').classList.remove('show');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizQs[quizIdx];
+  const pct = Math.round((quizIdx / quizQs.length) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('q-counter').textContent = (quizIdx + 1) + ' / ' + quizQs.length;
+  document.getElementById('q-topic-tag').textContent = '// ' + q.topicName;
+  document.getElementById('q-main').textContent = q.q;
+  document.getElementById('q-feedback').className = 'feedback';
+  document.getElementById('q-feedback').textContent = '';
+  document.getElementById('next-btn').classList.remove('show');
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = q.opts.map((o, i) => `
+    <button class="opt-btn" onclick="selectOpt(${i})">${o}</button>
+  `).join('');
+}
+
+function selectOpt(idx) {
+  const q = quizQs[quizIdx];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('q-feedback');
+  if (idx === q.ans) {
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.textContent = 'Correct!';
+    quizScore++;
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.ans].classList.add('correct');
+    fb.className = 'feedback wrong';
+    fb.textContent = 'Not quite. The correct answer is: ' + q.opts[q.ans];
+  }
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQuestion() {
+  quizIdx++;
+  if (quizIdx >= quizQs.length) {
+    showScore();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showScore() {
+  document.getElementById('q-card') && (document.querySelector('.q-card').style.display = 'none');
+  document.querySelector('.q-progress').style.display = 'none';
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('next-btn').classList.remove('show');
+  const pct = Math.round((quizScore / quizQs.length) * 100);
+  const sc = document.getElementById('score-card');
+  sc.classList.add('show');
+  const color = pct >= 70 ? 'var(--cool)' : pct >= 50 ? 'var(--warm)' : 'var(--hot)';
+  document.getElementById('score-big').style.color = color;
+  document.getElementById('score-big').textContent = quizScore + ' / ' + quizQs.length;
+  const msgs = pct === 100 ? 'Perfect score! You are ready!' : pct >= 70 ? 'Great work! Keep reviewing the missed ones.' : pct >= 50 ? 'Good effort! Review the topics and try again.' : 'Keep studying — you can do this!';
+  document.getElementById('score-msg').textContent = pct + '% — ' + msgs;
+}
+
+function resetQuiz() {
+  document.getElementById('quiz-setup').classList.remove('hidden');
+  document.getElementById('quiz-active').classList.remove('show');
+  document.querySelector('.q-card').style.display = '';
+  document.querySelector('.q-progress').style.display = '';
+  document.getElementById('q-feedback').style.display = '';
+  document.getElementById('score-card').classList.remove('show');
+}
+
+function buildCheatsheet() {
+  const el = document.getElementById('cheat-grid');
+  el.innerHTML = DATA.cheatsheet.map(c => `
+    <div class="cheat-card">
+      <div class="cheat-title">${c.title}</div>
+      ${c.items.map(i => `<div class="cheat-item">${i}</div>`).join('')}
+    </div>
+  `).join('');
+}
+
+function buildFillBlanks() {
+  const el = document.getElementById('fill-list');
+  el.innerHTML = DATA.fillBlanks.map((fb, i) => `
+    <div class="answer-item">
+      <div class="ai-q">${i + 1}. ${fb.q}</div>
+      <button class="ans-btn" onclick="toggleAns('fb-${i}', this)">Show answer</button>
+      <div class="ans-box" id="fb-${i}"><div class="ai-a">${fb.a}</div></div>
+    </div>
+  `).join('');
+}
+
+buildHome();
+buildTopics();
+buildQuizSetup();
+buildCheatsheet();
+buildFillBlanks();
+</script>
+</body>
+</html>
