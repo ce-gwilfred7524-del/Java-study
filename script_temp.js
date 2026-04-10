@@ -480,7 +480,7 @@ if (z == 4) {
     },
     {
       id: 'sc7',
-      q: 'Write a Java program that uses a class called Student with fields: name (String), indexNumber (String), and marks (double[]). Include a constructor, a method to calculate average marks, and a method to print the student's details. [5 marks] (Likely Section C based on OOP topics)',
+      q: "Write a Java program that uses a class called Student with fields: name (String), indexNumber (String), and marks (double[]). Include a constructor, a method to calculate average marks, and a method to print the student's details. [5 marks] (Likely Section C based on OOP topics)",
       marks: '5 marks (predicted)',
       subQuestions: [{
         label: 'Sample solution:',
@@ -638,7 +638,7 @@ public class MaxMin {
     },
     {
       id: 'sc13',
-      q: 'Write a Java program to reverse a String without using any built-in reverse method. [3 marks] (Predicted based on String methods topic)',
+      q: "Write a Java program to reverse a String without using any built-in reverse method. [3 marks] (Predicted based on String methods topic)",
       marks: '3 marks (predicted)',
       subQuestions: [{
         label: 'Solution:',
